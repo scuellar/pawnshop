@@ -68,113 +68,113 @@ lichess_skin.images = wiki_images
 
 default_skin = lichess_skin
 
-board_skin = default_skin
+class VBoard:
+    def __init__(self):
+        self.board           = chess.Board() #board_state
+        self.selected_square = -1  #-1 is None
+        self.selected_piece  = None
+        # If you want to play form the black side
+        self.flip_board = False
 
-
-
-
-# Initialize game board
-board = chess.Board()
-selected_square = -1 # Starts with none
-selected_piece  = None
-# If you want to play form the black side
-flip_board = False 
-
-def try_move(board, selected_square, target_square):
-    if selected_square >= 0:
-        move = chess.Move(selected_square, square)
-        # For now we only support promoting to queen (automatically)
-        move_promo = chess.Move(selected_square, square, chess.QUEEN)
-        if board.is_legal(move):
-            board.push(move)
-            return True
-        elif board.is_legal(move_promo):
-            board.push(move_promo)
-            return True
-        else:
-            print ("Not a legal move", move)
-    return False
-
-# If there is a piece in the selected square
-def try_select(board, square):
-    global selected_square, selected_piece
-    
-    if board.piece_at(square):
-        if board.piece_at(square).color == board.turn:
-            # Set selected piece
-            selected_piece = board.piece_at(square)
-            selected_square = chess.SQUARES[square]
-            print("SELECTED:", selected_piece, "/n at: ", row, col)
-            return True
-    return False
-
-
-def deselect():
-    global selected_piece, selected_square
-    
-    selected_piece = None
-    selected_square = -1
-    print("DESELECTED")
-
-
-def draw_board(board):
-    # Clear screen
-    screen.fill(WHITE)
-
-    # Draw chess board
-    for square in chess.SQUARES:
-        # Thses colomns display the board from blacks prespective
-        col = chess.square_file(square)  
-        row = chess.square_rank(square)
-
-        if not flip_board:
-            #If not flip, flip them to white's perspective
-            col = 7-col
-            row = 7-row
-
-        # If this square is a light one
-        is_light = (col + row) % 2 == 0
-
-        # Find the color of the square
-        if is_light:
-            square_color = board_skin.white
-        else:
-            square_color = board_skin.black
+        # How the board looks like 
+        self.board_skin = default_skin
+        self.square_size = 64 #pixels
         
-        if selected_square == square:
-            if is_light:
-                square_color = board_skin.white_selected
+        # Initialize game engine
+        pygame.init()
+
+        # Set screen size
+        self.screen = pygame.display.set_mode((8 * self.square_size, 8 * self.square_size))
+
+
+    def try_move(self, target_square):
+        if self.selected_square >= 0:
+            move = chess.Move(self.selected_square, square)
+            # For now we only support promoting to queen (automatically)
+            move_promo = chess.Move(self.selected_square, square, chess.QUEEN)
+            if self.board.is_legal(move):
+                self.board.push(move)
+                return True
+            elif self.board.is_legal(move_promo):
+                self.board.push(move_promo)
+                return True
             else:
-                square_color = board_skin.black_selected
-        elif board.move_stack:
-            last_move = board.peek() 
-            if square in [last_move.from_square, last_move.to_square]:
+                print ("Not a legal move", move)
+        return False
+    
+        # If there is a piece in the selected square
+    def try_select(self, square):
+    
+        if self.board.piece_at(square):
+            if self.board.piece_at(square).color == self.board.turn:
+                # Set selected piece
+                self.selected_piece = self.board.piece_at(square)
+                self.selected_square = chess.SQUARES[square]
+                print("SELECTED:", self.selected_piece, "/n at: ", row, col)
+                return True
+        return False
+    
+    
+    def deselect(self):
+        self.selected_piece = None
+        self.selected_square = -1
+        print("DESELECTED")
+    
+    
+    def draw_board(self):
+        # Clear screen
+        self.screen.fill(self.board_skin.white)
+    
+        # Draw chess board
+        for square in chess.SQUARES:
+            # Thses colomns display the board from blacks prespective
+            col = chess.square_file(square)  
+            row = chess.square_rank(square)
+    
+            if not self.flip_board:
+                #If not flip, flip them to white's perspective
+                col = 7-col
+                row = 7-row
+    
+            # If this square is a light one
+            is_light = (col + row) % 2 == 0
+    
+            # Find the color of the square
+            if is_light:
+                square_color = self.board_skin.white
+            else:
+                square_color = self.board_skin.black
+            
+            if self.selected_square == square:
                 if is_light:
-                    square_color = board_skin.white_highlight
+                    square_color = self.board_skin.white_selected
                 else:
-                    square_color = board_skin.black_highlight
+                    square_color = self.board_skin.black_selected
+            elif self.board.move_stack:
+                last_move = self.board.peek() 
+                if square in [last_move.from_square, last_move.to_square]:
+                    if is_light:
+                        square_color = self.board_skin.white_highlight
+                    else:
+                        square_color = self.board_skin.black_highlight
+    
+    
+            #Draw one square
+            # This could be optimized with a fixed background :P
+            pygame.draw.rect(self.screen, square_color, (col * 64, row * 64, 64, 64))
 
-
-                    
-        pygame.draw.rect(screen, square_color, (col * 64, row * 64, 64, 64))
-
-        piece = board.piece_at(square)
-        if piece:
-            screen.blit(images[piece.symbol()], (col * 64, row * 64))
-
-    # Update screen
-    pygame.display.flip()
+            piece = self.board.piece_at(square)
+            if piece:
+                self.screen.blit(self.board_skin.images[piece.symbol()], (col * 64, row * 64))
+    
+        # Update screen
+        pygame.display.flip()
 
 ###########
 # Game init
 ###########
+vb = VBoard()
 
-# Initialize game engine
-pygame.init()
-
-# Set screen size
-screen = pygame.display.set_mode((512, 512))
-    
 # Game loop
 running = True
 while running:
@@ -193,7 +193,7 @@ while running:
 
         # Press F to quit
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_f:
-            flip_board = not flip_board
+            vb.flip_board = not vb.flip_board
             
         # Mouse click
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -202,24 +202,24 @@ while running:
             if event.button == 1: # Left mouse button
                 # Get the row and column of the square that was clicked
                 row, col = event.pos[1] // 64, event.pos[0] // 64
-                if not flip_board:
+                if not vb.flip_board:
                     col = 7-col
                     row = 7-row
                     
                 square = row * 8 + col
 
                 # Try to move
-                moved = try_move(board, selected_square, square)
+                moved = vb.try_move(square)
 
                 #Try to select a valid piece (i.e of the right color)
-                selected = try_select(board, square)
+                selected = vb.try_select(square)
 
                 # If nothing happened then deselect
                 
                 if not (moved or selected):
-                    deselect()
+                    vb.deselect()
             
-    draw_board(board)
+    vb.draw_board()
 
 # Quit game engine
 pygame.display.quit()

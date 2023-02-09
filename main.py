@@ -3,6 +3,9 @@ import chess
 import virtual_board as VB
 
 
+def done():
+    pygame.display.quit()
+    pygame.quit()
 
 ###########
 # Game init
@@ -43,5 +46,4 @@ while running:
     vb.draw_board()
 
 # Quit game engine
-pygame.display.quit()
-pygame.quit()
+done()

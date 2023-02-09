@@ -13,6 +13,7 @@ are going to expand on them
 import pygame
 import chess
 import module as M
+import everyman_module as EM
 
 ##############
 # Board Skins
@@ -79,7 +80,7 @@ lichess_skin.images = wiki_images
 default_skin = lichess_skin
 
 
-default_module = M.PvP
+default_module = EM.EverymanModule # M.PvP
 
 ################
 # Virtual Board

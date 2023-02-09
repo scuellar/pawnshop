@@ -12,10 +12,20 @@ def unzip(ls):
 
 
 class EverymanModule(M.PvE):
+    """Every Man is a module that plays like the average lichess player
+ 
+    In each position, this engine checks evey move that has been
+    played by lichess players and whith what frequency. Using those
+    numbers as a distribuition over responses, this engin randomly
+    chooses the next move.
+    """
     def __init__(self):
         M.PvE.__init__(self)
         self.history = []
-
+        
+        self.opening_ended = False
+        """ Flipped when you reach a game never seen before in the database."""
+        
     def choose_next_move(self, board):
         play = ",".join(self.history)
         print("Play so far: ", play)
@@ -29,11 +39,15 @@ class EverymanModule(M.PvE):
         return next_move[0]
 
     def opponent_move(self, board):
+        if self.opening_ended:
+            return False
         last_move = board.peek()
         self.history = self.history + [last_move.uci()] 
         next_move_uci = self.choose_next_move(board)
         if next_move_uci == None:
             print("OPENING ENDED!!!")
+            print("End history:", self.history)
+            self.opening_ended = True
             return False
         next_move = chess.Move.from_uci(next_move_uci)
         self.history = self.history + [next_move.uci()] 

@@ -20,6 +20,11 @@ class GameModule:
     def try_select(self, board, square):
         raise Exception("Function not defined in Game Module: `try_select`.")
 
+    def wait_action(self, board):
+        """ What to do when no action has been triggered.
+        """
+        pass
+
 ####################
 # Some basic modules
 ####################
@@ -27,7 +32,6 @@ class GameModule:
 # + Local Player vs. Player
 class PvP(GameModule):
     """ Player vs. Player
-
     The basic module to play locally on the same screen
     """
     def __init__(self):
@@ -87,13 +91,15 @@ class PvE(PvP):
         # If it is your turn, try to move in the normal way
         result = PvP.try_move(self, board, source_sq, target_sq)
 
-        if result:
-            self.opponent_move(board)
         return result 
 
     def opponent_move(self, board):
         raise Exception("Function not defined in PvE module: `opponent_move`.")
-    
+    def wait_action(self, board):
+        # If it's the turn of the opponent, do the move. 
+        if board.turn != self.player_color:
+            self.opponent_move(board)
+        
     def try_select(self, board, square):
         # If it's not your turn you can't select
         if board.turn != self.player_color:

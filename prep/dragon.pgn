@@ -1,0 +1,13 @@
+[Event "Prep-Dragon: Chapter 1"]
+[Site "https://lichess.org/study/SRNCHyW7/QiXV5oEF"]
+[Result "*"]
+[UTCDate "2023.02.09"]
+[UTCTime "18:26:50"]
+[Variant "Standard"]
+[ECO "B75"]
+[Opening "Sicilian Defense: Dragon Variation, Yugoslav Attack, Early Deviations"]
+[Annotator "https://lichess.org/@/skuge"]
+
+1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 g6 6. Be3 { yugoslav attack } (6. Be2 Bg7)  (6. Bg5 Bg7)  (6. Bc4 Bg7) 6... Bg7 7. f3 *
+
+

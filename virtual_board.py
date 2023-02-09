@@ -14,6 +14,7 @@ import pygame
 import chess
 import module as M
 import everyman_module as EM
+import opening_practice as OP
 
 ##############
 # Board Skins
@@ -80,7 +81,7 @@ lichess_skin.images = wiki_images
 default_skin = lichess_skin
 
 
-default_module = EM.EverymanModule # M.PvP
+default_module = OP.OpeningPracticeModule # EM.EverymanModule # M.PvP
 
 ################
 # Virtual Board
@@ -159,6 +160,9 @@ class VBoard:
         # If you didn't select, you deselect.
         if moved or not selected:
             self.deselect()
+
+    def rest(self):
+        self.module.wait_action(self.board)
         
     def draw_board(self):
         # Clear screen

@@ -44,6 +44,7 @@ while running:
                 
             
     vb.draw_board()
+    vb.rest()
 
 # Quit game engine
 done()

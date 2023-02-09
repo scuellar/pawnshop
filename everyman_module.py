@@ -11,9 +11,9 @@ def unzip(ls):
     return (l1,l2)
 
 
-class EverymanModule(M.PvP):
+class EverymanModule(M.PvE):
     def __init__(self):
-        self.player_color = chess.WHITE
+        M.PvE.__init__(self)
         self.history = []
 
     def choose_next_move(self, board):
@@ -38,18 +38,3 @@ class EverymanModule(M.PvP):
         next_move = chess.Move.from_uci(next_move_uci)
         self.history = self.history + [next_move.uci()] 
         board.push(next_move)
-        
-    def try_move(self, board, source_sq, target_sq) -> bool:
-        if board.turn != self.player_color:
-            return False
-
-        result = M.PvP.try_move(self, board, source_sq, target_sq)
-
-        if result:
-            self.opponent_move(board)
-        return result 
-        
-    def try_select(self, board, square):
-        if board.turn != self.player_color:
-            return False
-        return M.PvP.try_select(self,board,square)

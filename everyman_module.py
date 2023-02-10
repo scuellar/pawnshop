@@ -11,7 +11,7 @@ def unzip(ls):
     return (l1,l2)
 
 
-class EverymanModule(M.PvE):
+class EverymanModule(M.PvE, M.ModuleEnds):
     """Every Man is a module that plays like the average lichess player
  
     In each position, this engine checks evey move that has been
@@ -21,13 +21,21 @@ class EverymanModule(M.PvE):
     """
     def __init__(self):
         M.PvE.__init__(self)
-        self.history = []
-        
-        self.opening_ended = False
+        M.ModuleEnds.__init__(self) # Creates self.ended = False
+
+    
+        self.ended = False
         """ Flipped when you reach a game never seen before in the database."""
+    def history(self, board):
+        # Create the history from the board.  If this module is
+        # stand-alone, it will be empty, but this could follow from a
+        # initial game or a playing with a previous module
+        history = [move.uci() for move in board.move_stack]
+        print("EMModule: Here are the moves so far", history)
+        return history #TODO can we cache?
         
     def choose_next_move(self, board):
-        play = ",".join(self.history)
+        play = ",".join(self.history(board))
         print("Play so far: ", play)
         dist = lt.get_distribution(play)
         if len(dist)==0:
@@ -39,16 +47,14 @@ class EverymanModule(M.PvE):
         return next_move[0]
 
     def opponent_move(self, board):
-        if self.opening_ended:
+        if self.ended:
             return False
         last_move = board.peek()
-        self.history = self.history + [last_move.uci()] 
         next_move_uci = self.choose_next_move(board)
         if next_move_uci == None:
             print("OPENING ENDED!!!")
-            print("End history:", self.history)
-            self.opening_ended = True
+            print("End history:", self.history(board))
+            self.ended = True
             return False
         next_move = chess.Move.from_uci(next_move_uci)
-        self.history = self.history + [next_move.uci()] 
         board.push(next_move)

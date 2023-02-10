@@ -2,15 +2,16 @@ import pygame
 import chess
 import virtual_board as VB
 
-
-def done():
-    pygame.display.quit()
-    pygame.quit()
-
 ###########
 # Game init
 ###########
 vb = VB.VBoard()
+
+def done():
+    pygame.display.quit()
+    pygame.quit()
+    vb.on_board_exit()
+
 
 # Game loop
 running = True

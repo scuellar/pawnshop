@@ -3,7 +3,7 @@ import chess.pgn as PGN
 import module as M
 import random
 
-class OpeningPracticeModule(M.PvE):
+class OpeningPracticeModule(M.PvE, M.ModuleEnds):
     """Opening Practice
 
     This engine takes a pgn file as input, with opening prep. It then
@@ -11,7 +11,7 @@ class OpeningPracticeModule(M.PvE):
     """
     def __init__(self):
         M.PvE.__init__(self)
-        self.opening_ended = False
+        M.ModuleEnds.__init__(self) # creates self.ended
         
         pgn_file = open("prep/dragon.pgn")
         self.full_prep = PGN.read_game(pgn_file)
@@ -19,7 +19,7 @@ class OpeningPracticeModule(M.PvE):
         self.current_game = self.full_prep
 
     def opponent_move(self, board):
-        if self.opening_ended:
+        if self.ended:
             return False
         # Check that the game and the prep are synced
         if board.turn != self.current_game.turn():
@@ -32,12 +32,12 @@ class OpeningPracticeModule(M.PvE):
             board.push(next_game.move)
             self.current_game = next_game
         else:
-            self.opening_ended = True
+            self.ended = True
             print ("Opening Ended")
             return False
 
     def try_move(self, board, source_sq, target_sq) -> bool:
-        if self.opening_ended:
+        if self.ended:
             return False
         
         if source_sq < 0:
@@ -50,7 +50,7 @@ class OpeningPracticeModule(M.PvE):
         # The check if the move is in the prep
         variations = self.current_game.variations
         if not variations:
-            self.opening_ended = True
+            self.ended = True
             print ("Opening Ended")
             return False
             

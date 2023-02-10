@@ -15,6 +15,7 @@ import chess
 import module as M
 import everyman_module as EM
 import opening_practice as OP
+import stockfish as SF
 
 ##############
 # Board Skins
@@ -80,11 +81,13 @@ lichess_skin.images = wiki_images
 
 default_skin = lichess_skin
 
-
-default_module = OP.OpeningPracticeModule # EM.EverymanModule # M.PvP
+mod1 = OP.OpeningPracticeModule
+mod2 = EM.EverymanModule
+mod3 = SF.StockfishModule
+default_module = lambda board : M.ModuleProduct3(mod1, mod2, mod3) #SF.StockfishModule # OP.OpeningPracticeModule # EM.EverymanModule # M.PvP
 
 ################
-# Virtual Board
+# Virtual Boarddo
 ################
 
 
@@ -107,7 +110,7 @@ class VBoard:
         self.screen = pygame.display.set_mode((8 * self.square_size, 8 * self.square_size))
 
         # Define the module to play with
-        self.module = default_module() # Creates an instance of the module
+        self.module = default_module(self.board) # Creates an instance of the module
 
     def try_move(self, target_square):
         return self.module.try_move(self.board, self.selected_square, target_square)
@@ -161,6 +164,10 @@ class VBoard:
         if moved or not selected:
             self.deselect()
 
+    def on_board_exit(self):
+        self.module.on_exit()
+        print("Goodbye!")
+        
     def rest(self):
         self.module.wait_action(self.board)
         

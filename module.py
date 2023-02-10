@@ -25,6 +25,99 @@ class GameModule:
         """
         pass
 
+    def on_exit(self):
+        pass
+
+##################
+# Modules that end
+##################
+class ModuleEnds:
+    """
+    For modules that end.
+
+    These modules can be combined with other modules.
+    """
+    def __init__(self):
+        self.ended = False
+
+####################
+# Combinators
+####################
+class ModuleProduct(GameModule):
+    """
+    Join two modules, the first one has to end
+    """
+    def __init__(self, mod1, mod2):
+        self.mod1 = mod1()
+        self.mod2 = mod2()
+
+    def try_move(self, board, source_sq, target_sq) -> bool:
+        if not self.mod1.ended:
+            return self.mod1.try_move(board, source_sq, target_sq)
+        else:
+            return self.mod2.try_move(board, source_sq, target_sq)
+        
+    def try_select(self, board, square):
+        if not self.mod1.ended:
+            return self.mod1.try_select(board, square)
+        else:
+            return self.mod2.try_select(board, square)
+
+    def wait_action(self, board):
+        if not self.mod1.ended:
+            return self.mod1.wait_action(board)
+        else:
+            return self.mod2.wait_action(board)
+
+    def on_exit(self):
+        # TODO exit modul 1 early? e.g. quit engines and stuff
+        self.mod1.on_exit()
+        self.mod2.on_exit()
+
+
+class ModuleProduct3(GameModule):
+    """Join three modules, the first one has to end, then the second
+
+    This can be achieved compositionally with two regular
+    `ModuleProduct`, but I like it this way :D
+
+    """
+    def __init__(self, mod1, mod2, mod3):
+        self.mod1 = mod1()
+        self.mod2 = mod2()
+        self.mod3 = mod3()
+
+    def try_move(self, board, source_sq, target_sq) -> bool:
+        if not self.mod1.ended:
+            return self.mod1.try_move(board, source_sq, target_sq)
+        elif not self.mod2.ended:
+            return self.mod2.try_move(board, source_sq, target_sq)
+        else:
+            return self.mod3.try_move(board, source_sq, target_sq)
+        
+    def try_select(self, board, square):
+        if not self.mod1.ended:
+            return self.mod1.try_select(board, square)
+        elif not self.mod2.ended:
+            return self.mod2.try_select(board, square)
+        else:
+            return self.mod3.try_select(board, square)
+
+    def wait_action(self, board):
+        if not self.mod1.ended:
+            return self.mod1.wait_action(board)
+        elif not self.mod2.ended:
+            return self.mod2.wait_action(board)
+        else:
+            return self.mod3.wait_action(board)
+
+    def on_exit(self):
+        # TODO exit modul 1 early? e.g. quit engines and stuff
+        self.mod1.on_exit()
+        self.mod2.on_exit()
+        self.mod3.on_exit()
+    
+        
 ####################
 # Some basic modules
 ####################

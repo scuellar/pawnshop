@@ -84,7 +84,7 @@ default_skin = lichess_skin
 mod1 = OP.OpeningPracticeModule
 mod2 = EM.EverymanModule
 mod3 = SF.StockfishModule
-default_module = lambda board : M.ModuleProduct3(mod1, mod2, mod3) #SF.StockfishModule # OP.OpeningPracticeModule # EM.EverymanModule # M.PvP
+default_module = M.ModuleProduct3(mod1, mod2, mod3) #SF.StockfishModule # OP.OpeningPracticeModule # EM.EverymanModule # M.PvP
 
 ################
 # Virtual Boarddo
@@ -93,7 +93,6 @@ default_module = lambda board : M.ModuleProduct3(mod1, mod2, mod3) #SF.Stockfish
 
 class VBoard:
     def __init__(self):
-        self.board           = chess.Board() #board_state
         self.selected_square = -1  #-1 is None
         self.selected_piece  = None
         # If you want to play form the black side
@@ -110,20 +109,19 @@ class VBoard:
         self.screen = pygame.display.set_mode((8 * self.square_size, 8 * self.square_size))
 
         # Define the module to play with
-        self.module = default_module(self.board) # Creates an instance of the module
+        self.module = default_module # Creates an instance of the module
 
     def try_move(self, target_square):
-        return self.module.try_move(self.board, self.selected_square, target_square)
+        return self.module.try_move(self.selected_square, target_square)
     
         # If there is a piece in the selected square
     def try_select(self, square):
-        can_select = self.module.try_select(self.board, square)
+        can_select = self.module.try_select(square)
         if can_select:
-            self.selected_piece = self.board.piece_at(square)
+            self.selected_piece = self.module.piece_at(square)
             self.selected_square = chess.SQUARES[square]
             print("SELECTED:", self.selected_piece, "/n at: ", square)
         return can_select
-        
     
     def deselect(self):
         self.selected_piece = None
@@ -169,7 +167,7 @@ class VBoard:
         print("Goodbye!")
         
     def rest(self):
-        self.module.wait_action(self.board)
+        self.module.wait_action()
         
     def draw_board(self):
         # Clear screen
@@ -194,8 +192,8 @@ class VBoard:
                     square_color = self.board_skin.white_selected
                 else:
                     square_color = self.board_skin.black_selected
-            elif self.board.move_stack:
-                last_move = self.board.peek() 
+            elif self.module.last_move():
+                last_move = self.module.last_move() 
                 if square in [last_move.from_square, last_move.to_square]:
                     if is_light:
                         square_color = self.board_skin.white_highlight
@@ -207,7 +205,7 @@ class VBoard:
             # This could be optimized with a fixed background :P
             pygame.draw.rect(self.screen, square_color, (col * 64, row * 64, 64, 64))
 
-            piece = self.board.piece_at(square)
+            piece = self.module.piece_at(square)
             if piece:
                 self.screen.blit(self.board_skin.images[piece.symbol()], (col * 64, row * 64))
     

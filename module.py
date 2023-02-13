@@ -8,25 +8,39 @@ Examples:
 
 """
 import chess
+from typing import Optional
 
 ################
 # Game Modules
 ################
 
 class GameModule:
-    def try_move(self, board, source_sq, target_sq) -> bool:
+    def __init__(self, board = chess.Board()):
+        self.board = board
+        
+    def try_move(self, source_sq, target_sq) -> bool:
         raise Exception("Function not defined in Game Module: `try_move`.")
     
-    def try_select(self, board, square):
+    def try_select(self, square):
         raise Exception("Function not defined in Game Module: `try_select`.")
 
-    def wait_action(self, board):
+    def wait_action(self):
         """ What to do when no action has been triggered.
         """
         pass
 
     def on_exit(self):
         pass
+
+    # Basic interface
+    def piece_at(self, square):
+        return self.board.piece_at(square)
+
+    def last_move(self) -> Optional[chess.Move]:
+        if self.board.move_stack:
+            return self.board.peek()
+        else:
+            return None
 
 ##################
 # Modules that end
@@ -48,26 +62,29 @@ class ModuleProduct(GameModule):
     Join two modules, the first one has to end
     """
     def __init__(self, mod1, mod2):
+        GameModule.__init__(self)
         self.mod1 = mod1()
         self.mod2 = mod2()
+        self.mod1.set_board = self.board
+        self.mod2.set_board = self.board
 
-    def try_move(self, board, source_sq, target_sq) -> bool:
+    def try_move(self, source_sq, target_sq) -> bool:
         if not self.mod1.ended:
-            return self.mod1.try_move(board, source_sq, target_sq)
+            return self.mod1.try_move(source_sq, target_sq)
         else:
-            return self.mod2.try_move(board, source_sq, target_sq)
+            return self.mod2.try_move(source_sq, target_sq)
         
-    def try_select(self, board, square):
+    def try_select(self, square):
         if not self.mod1.ended:
-            return self.mod1.try_select(board, square)
+            return self.mod1.try_select(square)
         else:
-            return self.mod2.try_select(board, square)
+            return self.mod2.try_select(square)
 
-    def wait_action(self, board):
+    def wait_action(self):
         if not self.mod1.ended:
-            return self.mod1.wait_action(board)
+            return self.mod1.wait_action()
         else:
-            return self.mod2.wait_action(board)
+            return self.mod2.wait_action()
 
     def on_exit(self):
         # TODO exit modul 1 early? e.g. quit engines and stuff
@@ -83,33 +100,38 @@ class ModuleProduct3(GameModule):
 
     """
     def __init__(self, mod1, mod2, mod3):
+        GameModule.__init__(self)
         self.mod1 = mod1()
         self.mod2 = mod2()
         self.mod3 = mod3()
-
-    def try_move(self, board, source_sq, target_sq) -> bool:
-        if not self.mod1.ended:
-            return self.mod1.try_move(board, source_sq, target_sq)
-        elif not self.mod2.ended:
-            return self.mod2.try_move(board, source_sq, target_sq)
-        else:
-            return self.mod3.try_move(board, source_sq, target_sq)
         
-    def try_select(self, board, square):
+        self.mod1.set_board = self.board
+        self.mod2.set_board = self.board
+        self.mod3.set_board = self.board
+        
+    def try_move(self, source_sq, target_sq) -> bool:
         if not self.mod1.ended:
-            return self.mod1.try_select(board, square)
+            return self.mod1.try_move(source_sq, target_sq)
         elif not self.mod2.ended:
-            return self.mod2.try_select(board, square)
+            return self.mod2.try_move(source_sq, target_sq)
         else:
-            return self.mod3.try_select(board, square)
+            return self.mod3.try_move(source_sq, target_sq)
+        
+    def try_select(self, square):
+        if not self.mod1.ended:
+            return self.mod1.try_select(square)
+        elif not self.mod2.ended:
+            return self.mod2.try_select(square)
+        else:
+            return self.mod3.try_select(square)
 
-    def wait_action(self, board):
+    def wait_action(self):
         if not self.mod1.ended:
-            return self.mod1.wait_action(board)
+            return self.mod1.wait_action()
         elif not self.mod2.ended:
-            return self.mod2.wait_action(board)
+            return self.mod2.wait_action()
         else:
-            return self.mod3.wait_action(board)
+            return self.mod3.wait_action()
 
     def on_exit(self):
         # TODO exit modul 1 early? e.g. quit engines and stuff
@@ -128,26 +150,36 @@ class PvP(GameModule):
     The basic module to play locally on the same screen
     """
     def __init__(self):
-        pass
+        GameModule.__init__(self)
 
-    def try_move(self, board, source_sq, target_sq) -> bool:
+    def set_board(self, board):
+        """Changes the board. Usefull for composition.
+
+        Any module that caries aditional state should problaly
+        redefine this function, to reset the state.
+        """
+        self.board = board
+        return True
+
+        
+    def try_move(self, source_sq, target_sq) -> bool:
         if source_sq >= 0:
             move = chess.Move(source_sq, target_sq)
             # For now we only support promoting to queen (automatically)
             move_promo = chess.Move(source_sq, target_sq, chess.QUEEN)
-            if board.is_legal(move):
-                board.push(move)
+            if self.board.is_legal(move):
+                self.board.push(move)
                 return True
-            elif board.is_legal(move_promo):
-                board.push(move_promo)
+            elif self.board.is_legal(move_promo):
+                self.board.push(move_promo)
                 return True
             else:
                 print ("Not a legal move", move)
         return False
 
-    def try_select(self, board, square):
-        if board.piece_at(square):
-            if board.piece_at(square).color == board.turn:
+    def try_select(self, square):
+        if self.board.piece_at(square):
+            if self.board.piece_at(square).color == self.board.turn:
                 # Set selected piece
                 return True
         return False
@@ -167,8 +199,9 @@ class PvE(PvP):
     can_change_sides = True
     
     def __init__(self):
+        PvP.__init__(self)
         self.player_color = chess.WHITE
-        
+    
     def change_side(self):
         if self.can_change_sides:
             if self.player_color == chess.WHITE:
@@ -176,27 +209,27 @@ class PvE(PvP):
             else:
                 self.player_color = chess.WHITE
         
-    def try_move(self, board, source_sq, target_sq) -> bool:
+    def try_move(self, source_sq, target_sq) -> bool:
         # If it's not your turn you cna't move
-        if board.turn != self.player_color:
+        if self.board.turn != self.player_color:
             return False
 
         # If it is your turn, try to move in the normal way
-        result = PvP.try_move(self, board, source_sq, target_sq)
+        result = PvP.try_move(self, source_sq, target_sq)
 
         return result 
 
-    def opponent_move(self, board):
+    def opponent_move(self):
         raise Exception("Function not defined in PvE module: `opponent_move`.")
-    def wait_action(self, board):
+    
+    def wait_action(self):
         # If it's the turn of the opponent, do the move. 
-        if board.turn != self.player_color:
-            self.opponent_move(board)
+        if self.board.turn != self.player_color:
+            self.opponent_move()
         
-    def try_select(self, board, square):
+    def try_select(self, square):
         # If it's not your turn you can't select
-        if board.turn != self.player_color:
+        if self.board.turn != self.player_color:
             return False
         # If it is your turn, try to select in the normal way
-        return PvP.try_select(self,board,square)
-    
+        return PvP.try_select(self, square)

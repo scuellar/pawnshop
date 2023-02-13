@@ -12,11 +12,11 @@ class StockfishModule(M.PvE):
         self.engine = chess.engine.SimpleEngine.popen_uci(r"/usr/local/bin/stockfish")
         self.time_limit = 0.1 # 100 milliseconds per move
 
-    def opponent_move(self, board):
+    def opponent_move(self):
         # Get the possible next moves and check it's not empty
-        result = self.engine.play(board, chess.engine.Limit(time=0.1))
+        result = self.engine.play(self.board, chess.engine.Limit(time=0.1))
         print("Oponent move:", result.move)
-        board.push(result.move)
+        self.board.push(result.move)
 
     def on_exit(self):
         self.engine.quit()

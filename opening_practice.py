@@ -18,25 +18,25 @@ class OpeningPracticeModule(M.PvE, M.ModuleEnds):
         print("Hey, I loaded a game:", self.full_prep)
         self.current_game = self.full_prep
 
-    def opponent_move(self, board):
+    def opponent_move(self):
         if self.ended:
             return False
         # Check that the game and the prep are synced
-        if board.turn != self.current_game.turn():
+        if self.board.turn != self.current_game.turn():
             raise Exeption("board and prep got out of sync!")
         
         # Get the possible next moves and check it's not empty
         variations = self.current_game.variations
         if variations:
             next_game = random.choice(variations)
-            board.push(next_game.move)
+            self.board.push(next_game.move)
             self.current_game = next_game
         else:
             self.ended = True
             print ("Opening Ended")
             return False
 
-    def try_move(self, board, source_sq, target_sq) -> bool:
+    def try_move(self, source_sq, target_sq) -> bool:
         if self.ended:
             return False
         
@@ -63,7 +63,7 @@ class OpeningPracticeModule(M.PvE, M.ModuleEnds):
             return False
         
         self.current_game = variations[index]
-        board.push(self.current_game.move)
+        self.board.push(self.current_game.move)
         return True
         
 # pgn_file = open("prep/dragon.pgn")

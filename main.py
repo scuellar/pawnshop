@@ -1,5 +1,4 @@
 import pygame
-import chess
 import virtual_board as VB
 
 ###########

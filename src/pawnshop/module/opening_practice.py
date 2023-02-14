@@ -86,8 +86,8 @@ class OpeningPracticeModule(M.PvE, M.ModuleEnds):
     def get_config_menu(self):
         config_menu = M.PvE.get_config_menu(self)
         choose_prep_label = menu.mk_label("Choose Prep")
-        choose_prep = menu.mk_drop_down(self.set_prep, self.prep_names, self.prep_names[0])
-        return config_menu + [choose_prep_label, choose_prep]
+        choose_prep = menu.mk_drop_down("Choose prep", self.set_prep, self.prep_names, self.prep_names[0])
+        return config_menu + [choose_prep]
         
     def set_prep(self, prep_file):
         self.prep_name = prep_file

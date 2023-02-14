@@ -3,6 +3,7 @@ import pygame_gui
 import menu
 import module.all_modules as modules
 import virtual_board as VB
+import sys
 
 pygame.init()
 pygame.display.set_caption('PawnShop')
@@ -86,10 +87,7 @@ def back_button_function():
     main_menu_handler.enable()
     config_menu_handler.disable()
     
-back_button_item = (pygame_gui.elements.UIButton,
-                   [(pygame_gui.UI_BUTTON_PRESSED,
-                    back_button_function)],
-                   dict(text='Back') )
+back_button_item = menu.mk_button('Back', back_button_function)
 
 # Modules
 def choose_module_function(event_text):
@@ -98,7 +96,7 @@ def choose_module_function(event_text):
     print("New Choice ", event_text)
     THE_MODULE = event_text
 
-choose_modules = menu.mk_drop_down(choose_module_function,
+choose_modules = menu.mk_drop_down('Choose module', choose_module_function,
                               modules.available_modules_names, modules.default_module)
 
 main_menu_items = [choose_modules, next_button_item, exit_button_item]
@@ -109,6 +107,7 @@ is_running = True
 def done ():
     pygame.display.quit()
     pygame.quit()
+    exit()
 
 i = 0
 while is_running:

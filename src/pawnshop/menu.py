@@ -13,18 +13,18 @@ DB.DEBUG_LEVEL = 2
 ################################
 
 def mk_label(name):
-    return (pygame_gui.elements.UILabel,
+    return (None, pygame_gui.elements.UILabel,
             [],
             dict(text=name))
 
 def mk_button(name, action):
-    return (pygame_gui.elements.UIButton,
+    return (None, pygame_gui.elements.UIButton,
             [(pygame_gui.UI_BUTTON_PRESSED,
               action)],
             dict(text=name))
 
-def mk_drop_down(action, list, default):
-    return (pygame_gui.elements.UIDropDownMenu,
+def mk_drop_down(label, action, list, default):
+    return (label, pygame_gui.elements.UIDropDownMenu,
             [(pygame_gui.UI_DROP_DOWN_MENU_CHANGED,
               action)],
             {'options_list' : list,
@@ -46,15 +46,16 @@ class MenuHandler():
         self.window_surface = window_surface
         self.enabled = True
         self.dimensions = dimensions
-        self.item_width = 150
-        self.item_height = 50
+        self.item_width = 150 * 2 # includes label
+        self.item_height = 40
         self.available_height = self.dimensions[1]-2*self.item_height
-        self.available_width  = self.dimensions[0]-2*self.item_width
+        self.available_width  = self.dimensions[0]-self.item_width
         
         
     def create_menu(self, menu_items, theme = None):
         """
         Every menu item must contain
+        0. Label : Optional(string)
         1. The generating function (e.g. pygame_gui.elements.UIButton)
         2. list of Pairs of event type and Handler function
         3. The arguments (kwarg) as a dictionary
@@ -63,21 +64,37 @@ class MenuHandler():
         total_menu_height = self.item_height * len(menu_items)
         columns = math.ceil(total_menu_height / self.available_height)
         items_per_column = math.ceil(len(menu_items) /columns) # Round up
+        x_offset = self.available_width // columns
+        DB.debug(2, "total_menu_height", total_menu_height, " self.available_width ", self.available_width)
         DB.debug(2, "Menu needs", columns, " columns with ", items_per_column, "items per column")
         
         items = 0
-        for (item_gen, handlers, kwargs) in menu_items:
+        for (label, item_gen, handlers, kwargs) in menu_items:
             #Create coordinates
             (column, row) = (items // items_per_column, items % items_per_column)
-            x_offset = self.available_width // columns
-            x = column * x_offset + (x_offset // 2) + self.item_width // 2
+            print("column", column, "/ x_offset", x_offset, "/ self.item_width", self.item_width)
+            x = column * x_offset + (x_offset // 2) 
             y = (row + 1) * self.item_height + self.item_height // 2
-            # Create the rectangle
-            rectangle = pygame.Rect((x, y), (self.item_width,
+            width = self.item_width
+            # create rectangles
+            if label:
+                #If there is a label shift right by half the size
+                lbl_x = x
+                x     = x + self.item_width//2
+                width = width //2
+                
+            # Create the rectangles
+            rectangle = pygame.Rect((x, y), (width,
                                              self.item_height))
-            
-            my_item = item_gen(manager = self.manager,
+            my_item  = item_gen(manager = self.manager,
                                relative_rect=rectangle, **kwargs)
+            if label:
+                lbl_rectangle = pygame.Rect((lbl_x, y),
+                                            (width,
+                                             self.item_height))
+                my_label = pygame_gui.elements.UILabel(text=label, manager
+                                                       = self.manager,
+                                                       relative_rect=lbl_rectangle)
             for (event_type, handler) in handlers:
                 if not event_type in self.item_handlers:
                     self.item_handlers[event_type] = {}

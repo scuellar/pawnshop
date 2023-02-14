@@ -262,7 +262,7 @@ class PvE(PvP):
         self.player_color = prev_module.player_color
         
     def get_config_menu(self):
-        choose_player_button = menu.mk_drop_down(self.set_player, ["White", "Black"], "White")
+        choose_player_button = menu.mk_drop_down('Choose color',self.set_player, ["White", "Black"], "White")
         
         config_menu = PvP.get_config_menu(self)
         if self.is_start:

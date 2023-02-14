@@ -15,6 +15,9 @@ from typing import Optional
 ################
 
 class GameModule:
+    name = "Game Module"
+    status = ""
+    
     def __init__(self, board = chess.Board()):
         self.board = board
         
@@ -33,6 +36,13 @@ class GameModule:
         pass
 
     # Basic interface
+    
+    def get_name(self):
+        return self.name
+    
+    def get_status(self):
+        return self.status
+    
     def piece_at(self, square):
         return self.board.piece_at(square)
 
@@ -65,8 +75,14 @@ class ModuleProduct(GameModule):
         GameModule.__init__(self)
         self.mod1 = mod1()
         self.mod2 = mod2()
-        self.mod1.set_board = self.board
-        self.mod2.set_board = self.board
+        self.mod1.set_board(self.board)
+        self.mod2.set_board(self.board)
+
+    def set_board(self, board):
+        self.board = board
+        self.mod1.set_board(self.board)
+        self.mod2.set_board(self.board)
+        
 
     def try_move(self, source_sq, target_sq) -> bool:
         if not self.mod1.ended:
@@ -91,8 +107,22 @@ class ModuleProduct(GameModule):
         self.mod1.on_exit()
         self.mod2.on_exit()
 
+    name =  "Product"
+    def get_name(self):
+        if not self.mod1.ended:
+            in_name = self.mod1.get_name()
+        else:
+            in_name = self.mod2.get_name()
+        return self.name + ", " + in_name
+        
+    def get_status(self):
+        if not self.mod1.ended:
+            return self.mod1.get_status()
+        else:
+            return self.mod2.get_status()
 
-class ModuleProduct3(GameModule):
+
+class ModuleProduct3(ModuleProduct):
     """Join three modules, the first one has to end, then the second
 
     This can be achieved compositionally with two regular
@@ -102,36 +132,44 @@ class ModuleProduct3(GameModule):
     def __init__(self, mod1, mod2, mod3):
         GameModule.__init__(self)
         self.mod1 = mod1()
-        self.mod2 = mod2()
-        self.mod3 = mod3()
-        
-        self.mod1.set_board = self.board
-        self.mod2.set_board = self.board
-        self.mod3.set_board = self.board
-        
-    def try_move(self, source_sq, target_sq) -> bool:
-        if not self.mod1.ended:
-            return self.mod1.try_move(source_sq, target_sq)
-        elif not self.mod2.ended:
-            return self.mod2.try_move(source_sq, target_sq)
-        else:
-            return self.mod3.try_move(source_sq, target_sq)
-        
-    def try_select(self, square):
-        if not self.mod1.ended:
-            return self.mod1.try_select(square)
-        elif not self.mod2.ended:
-            return self.mod2.try_select(square)
-        else:
-            return self.mod3.try_select(square)
+        self.mod2 = ModuleProduct(mod2, mod3)
 
-    def wait_action(self):
+        self.mod1.set_board(self.board)
+        self.mod2.set_board(self.board)
+
+    name =  "Product3"
+    def get_name(self):
         if not self.mod1.ended:
-            return self.mod1.wait_action()
-        elif not self.mod2.ended:
-            return self.mod2.wait_action()
+            in_name = self.mod1.get_name()
+        elif not self.mod2.mod1.ended:
+            in_name = self.mod2.mod1.get_name()
         else:
-            return self.mod3.wait_action()
+            in_name = self.mod2.mod2.get_name()
+        return self.name + ", " + in_name
+        
+    # def try_move(self, source_sq, target_sq) -> bool:
+    #     if not self.mod1.ended:
+    #         return self.mod1.try_move(source_sq, target_sq)
+    #     elif not self.mod2.ended:
+    #         return self.mod2.try_move(source_sq, target_sq)
+    #     else:
+    #         return self.mod3.try_move(source_sq, target_sq)
+        
+    # def try_select(self, square):
+    #     if not self.mod1.ended:
+    #         return self.mod1.try_select(square)
+    #     elif not self.mod2.ended:
+    #         return self.mod2.try_select(square)
+    #     else:
+    #         return self.mod3.try_select(square)
+
+    # def wait_action(self):
+    #     if not self.mod1.ended:
+    #         return self.mod1.wait_action()
+    #     elif not self.mod2.ended:
+    #         return self.mod2.wait_action()
+    #     else:
+    #         return self.mod3.wait_action()
 
     def on_exit(self):
         # TODO exit modul 1 early? e.g. quit engines and stuff
@@ -149,6 +187,7 @@ class PvP(GameModule):
     """ Player vs. Player
     The basic module to play locally on the same screen
     """
+    name = "PvP"
     def __init__(self):
         GameModule.__init__(self)
 
@@ -197,7 +236,7 @@ class PvE(PvP):
     - Database
     """
     can_change_sides = True
-    
+    name = "PvE"
     def __init__(self):
         PvP.__init__(self)
         self.player_color = chess.WHITE

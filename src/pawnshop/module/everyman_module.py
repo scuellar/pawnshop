@@ -19,6 +19,7 @@ class EverymanModule(M.PvE, M.ModuleEnds):
     numbers as a distribuition over responses, this engin randomly
     chooses the next move.
     """
+    name = "average chess"
     def __init__(self):
         M.PvE.__init__(self)
         M.ModuleEnds.__init__(self) # Creates self.ended = False

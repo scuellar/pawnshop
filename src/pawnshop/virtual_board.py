@@ -49,15 +49,18 @@ wiki_images[WHITE_QUEEN ] = pygame.image.load("img/pieces/white_queen.png")
 wiki_images[WHITE_KING  ] = pygame.image.load("img/pieces/white_king.png")
 wiki_images[WHITE_PAWN  ] = pygame.image.load("img/pieces/white_pawn.png")
 
-default_color = (0,0,0)
+DEFAULT_BLACK = (0,0,0)
+DEFAULT_WHITE = (0,0,0)
 class BoardSkin:
     def __init__(self,
-                 black = default_color,
-                 black_highlighted = default_color,
-                 black_selected = default_color,
-                 white = default_color,
-                 white_highlight = default_color,
-                 white_selected = default_color,
+                 black             = DEFAULT_BLACK,
+                 black_highlighted = DEFAULT_BLACK,
+                 black_selected    = DEFAULT_BLACK,
+                 white             = DEFAULT_WHITE,
+                 white_highlight   = DEFAULT_WHITE,
+                 white_selected    = DEFAULT_WHITE,
+                 background_color  = DEFAULT_BLACK,
+                 text_color        = DEFAULT_WHITE,
                  images = wiki_images
                 ):
         self.black             = black              
@@ -66,7 +69,10 @@ class BoardSkin:
         self.white             = white              
         self.white_highlight   = white_highlight    
         self.white_selected    = white_selected     
-        self.images            = images             
+        self.images            = images
+        
+        self.background_color  = background_color
+        self.text_color        = text_color
 
         
 # Build our default skin
@@ -78,6 +84,8 @@ lichess_skin.white = (180,136,99)
 lichess_skin.white_highlight = (206,209,123)
 lichess_skin.white_selected = (135,151,106)
 lichess_skin.images = wiki_images
+lichess_skin.background_color = (22,21,18)
+lichess_skin.text_color = (52,134,213)
 
 default_skin = lichess_skin
 
@@ -85,6 +93,7 @@ mod1 = OP.OpeningPracticeModule
 mod2 = EM.EverymanModule
 mod3 = SF.StockfishModule
 default_module = M.ModuleProduct3(mod1, mod2, mod3) #SF.StockfishModule # OP.OpeningPracticeModule # EM.EverymanModule # M.PvP
+default_module.name = "TYD"
 
 ################
 # Virtual Boarddo
@@ -101,12 +110,14 @@ class VBoard:
         # How the board looks like 
         self.board_skin = default_skin
         self.square_size = 64 #pixels
-        
+        self.board_height = 8 * self.square_size
+        self.status_height = 20
+    
         # Initialize game engine
         pygame.init()
 
         # Set screen size
-        self.screen = pygame.display.set_mode((8 * self.square_size, 8 * self.square_size))
+        self.screen = pygame.display.set_mode((self.board_height, self.board_height + self.status_height))
 
         # Define the module to play with
         self.module = default_module # Creates an instance of the module
@@ -120,13 +131,11 @@ class VBoard:
         if can_select:
             self.selected_piece = self.module.piece_at(square)
             self.selected_square = chess.SQUARES[square]
-            print("SELECTED:", self.selected_piece, "/n at: ", square)
         return can_select
     
     def deselect(self):
         self.selected_piece = None
         self.selected_square = -1
-        print("DESELECTED")
 
     def sq2coor(self, square:int) -> (int, int):
         """Get the row and column from a square"""
@@ -168,10 +177,35 @@ class VBoard:
         
     def rest(self):
         self.module.wait_action()
+
+    def draw_status(self):
+        name = self.module.get_name()
+        status = self.module.get_status()
+
+        display = name + " : " + status
+        
+        pygame.draw.rect(self.screen,
+                         self.board_skin.background_color,
+                         (0,
+                          self.board_height,
+                          self.board_height,
+                          self.status_height))
+        font = pygame.font.Font(None, 16)
+        status_text = font.render(display, True, self.board_skin.text_color)
+        
+        # Get the rect of the text surface and set its top-left corner to (64, 128)
+        status_text_rect = status_text.get_rect()
+        status_text_rect.topleft = (0, self.board_height+2)
+        
+        self.screen.blit(status_text, status_text_rect)
         
     def draw_board(self):
         # Clear screen
         self.screen.fill(self.board_skin.white)
+
+        # Draw status box
+        self.draw_status()
+
     
         # Draw chess board
         for square in chess.SQUARES:
@@ -203,11 +237,14 @@ class VBoard:
     
             #Draw one square
             # This could be optimized with a fixed background :P
-            pygame.draw.rect(self.screen, square_color, (col * 64, row * 64, 64, 64))
+            pygame.draw.rect(self.screen, square_color, (col *
+                                                         self.square_size, row * self.square_size,
+                                                         self.square_size, self.square_size))
 
             piece = self.module.piece_at(square)
             if piece:
-                self.screen.blit(self.board_skin.images[piece.symbol()], (col * 64, row * 64))
+                self.screen.blit(self.board_skin.images[piece.symbol()],
+                                 (col * self.square_size, row * self.square_size))
     
         # Update screen
         pygame.display.flip()

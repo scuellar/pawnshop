@@ -9,6 +9,7 @@ class OpeningPracticeModule(M.PvE, M.ModuleEnds):
     This engine takes a pgn file as input, with opening prep. It then
     "quizes" the player by following the prep tree.
     """
+    name = "Opening Practice"
     def __init__(self):
         M.PvE.__init__(self)
         M.ModuleEnds.__init__(self) # creates self.ended
@@ -42,7 +43,8 @@ class OpeningPracticeModule(M.PvE, M.ModuleEnds):
         
         if source_sq < 0:
             return False
-        
+
+        self.status = ""
         move = chess.Move(source_sq, target_sq)
         # For now we only support promoting to queen (automatically)
         move_promo = chess.Move(source_sq, target_sq, chess.QUEEN)
@@ -60,6 +62,9 @@ class OpeningPracticeModule(M.PvE, M.ModuleEnds):
         elif move_promo in prep_moves:
             index = prep_movedones.index(move_promodone)
         else:
+            if self.board.is_legal(move):
+                print("STR: ", str)
+                self.status = str(move) + " is not in your prep."
             return False
         
         self.current_game = variations[index]

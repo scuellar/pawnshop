@@ -12,10 +12,10 @@ are going to expand on them
 """
 import pygame
 import chess
-import module as M
-import everyman_module as EM
-import opening_practice as OP
-import stockfish as SF
+import module.module as M
+import module.everyman_module as EM
+import module.opening_practice as OP
+import module.stockfish as SF
 
 ##############
 # Board Skins

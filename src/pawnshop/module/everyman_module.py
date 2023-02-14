@@ -1,7 +1,7 @@
-import module as M
+import module.module as M
 import random
 import chess
-import lichessTalk as lt
+import module.lichessTalk as lt
 # import asyncio
 
 def unzip(ls):

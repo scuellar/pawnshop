@@ -1,6 +1,6 @@
 import chess
 import chess.pgn as PGN
-import module as M
+import module.module as M
 import random
 
 class OpeningPracticeModule(M.PvE, M.ModuleEnds):

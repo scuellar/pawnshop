@@ -1,12 +1,13 @@
 import chess
 import chess.engine
-import module as M
+import module.module as M
 
 class StockfishModule(M.PvE):
     """StockfishModule
 
     This engine just runs stockfish in the background
     """
+    name = "stockfish"
     def __init__(self):
         M.PvE.__init__(self)
         self.engine = chess.engine.SimpleEngine.popen_uci(r"/usr/local/bin/stockfish")

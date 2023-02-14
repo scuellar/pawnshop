@@ -11,8 +11,10 @@ train_your_dragon = lambda : M.ModuleProduct3(prep_practice,
                                                 stockfish_module)
 pvp = M.PvP
 
-available_modules = [("Train Your Dragon", train_your_dragon),
-                     ("PvP", pvp),
-                     ("Stockfish", stockfish_module),
-                     ("Prep practice", prep_practice),
-                     ("Average player", average_player)]
+available_modules = {"Train Your Dragon": train_your_dragon,
+                     "PvP": pvp,
+                     "Stockfish": stockfish_module,
+                     "Prep practice": prep_practice,
+                     "Average player": average_player}
+available_modules_names = available_modules.keys()
+default_module = "Train Your Dragon"

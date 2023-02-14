@@ -20,6 +20,7 @@ class GameModule:
     
     def __init__(self, board = chess.Board()):
         self.board = board
+        self.config_menu = []
         
     def try_move(self, source_sq, target_sq) -> bool:
         raise Exception("Function not defined in Game Module: `try_move`.")

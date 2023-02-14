@@ -108,6 +108,7 @@ class VBoard:
         self.flip_board = False
         # Define the module to play with
         self.module = module
+        self.enabled = False
 
         # How the board looks like 
         self.board_skin = default_skin
@@ -137,6 +138,12 @@ class VBoard:
         self.selected_piece = None
         self.selected_square = -1
 
+    def enable(self):
+        self.enabled = True
+
+    def disable(self):
+        self.enabled = False
+        
     def sq2coor(self, square:int) -> (int, int):
         """Get the row and column from a square"""
         col = 7 - square % 8
@@ -200,51 +207,71 @@ class VBoard:
         self.screen.blit(status_text, status_text_rect)
         
     def draw_board(self):
-        # Clear screen
-        self.screen.fill(self.board_skin.white)
-
-        # Draw status box
-        self.draw_status()
-
-    
-        # Draw chess board
-        for square in chess.SQUARES:
-            # Thses colomns display the board from blacks prespective
-            (row, col) = self.sq2coor(square)
-    
-            # If this square is a light one
-            is_light = (col + row) % 2 == 1
-    
-            # Find the color of the square
-            if is_light:
-                square_color = self.board_skin.white
-            else:
-                square_color = self.board_skin.black
+        if self.enabled:
+            # Clear screen
+            self.screen.fill(self.board_skin.white)
             
-            if self.selected_square == square:
+            # Draw status box
+            self.draw_status()
+            
+            
+            # Draw chess board
+            for square in chess.SQUARES:
+                # Thses colomns display the board from blacks prespective
+                (row, col) = self.sq2coor(square)
+            
+                # If this square is a light one
+                is_light = (col + row) % 2 == 1
+            
+                # Find the color of the square
                 if is_light:
-                    square_color = self.board_skin.white_selected
+                    square_color = self.board_skin.white
                 else:
-                    square_color = self.board_skin.black_selected
-            elif self.module.last_move():
-                last_move = self.module.last_move() 
-                if square in [last_move.from_square, last_move.to_square]:
+                    square_color = self.board_skin.black
+                
+                if self.selected_square == square:
                     if is_light:
-                        square_color = self.board_skin.white_highlight
+                        square_color = self.board_skin.white_selected
                     else:
-                        square_color = self.board_skin.black_highlight
-    
-    
-            #Draw one square
-            # This could be optimized with a fixed background :P
-            pygame.draw.rect(self.screen, square_color, (col *
-                                                         self.square_size, row * self.square_size,
-                                                         self.square_size, self.square_size))
+                        square_color = self.board_skin.black_selected
+                elif self.module.last_move():
+                    last_move = self.module.last_move() 
+                    if square in [last_move.from_square, last_move.to_square]:
+                        if is_light:
+                            square_color = self.board_skin.white_highlight
+                        else:
+                            square_color = self.board_skin.black_highlight
+            
+            
+                #Draw one square
+                # This could be optimized with a fixed background :P
+                pygame.draw.rect(self.screen, square_color, (col *
+                                                             self.square_size, row * self.square_size,
+                                                             self.square_size, self.square_size))
+            
+                piece = self.module.piece_at(square)
+                if piece:
+                    self.screen.blit(self.board_skin.images[piece.symbol()],
+                                     (col * self.square_size, row * self.square_size))
+            
+            # Update screen
+            pygame.display.flip()
 
-            piece = self.module.piece_at(square)
-            if piece:
-                self.screen.blit(self.board_skin.images[piece.symbol()],
-                                 (col * self.square_size, row * self.square_size))
+    def frame_step(self, events):
+        if self.enabled:
+            for event in events:
+                ###############
+                # GUI EVENTS:
+                ###############
     
-        # Update screen
-        pygame.display.flip()
+                # Press F to quit
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
+                    self.flip_board = not self.flip_board
+                            
+                # Mouse click
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    # Left Click
+                    if event.button == 1: # Left mouse button
+                        # Get the row and column of the square that was clicked
+                        row, col = event.pos[1] // 64, event.pos[0] // 64
+                        self.left_click(row,col)

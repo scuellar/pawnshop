@@ -2,70 +2,105 @@
 Main menu for pawnshop
 """
 import pygame
-import pygame_menu
-from pygame_menu.examples import create_example_window
-from module.all_modules import available_modules
-from typing import Tuple, Any
-import main
+import pygame_gui
+import debug.debug as DB
+import math
 
-surface = create_example_window('Pawnshop menu', (600, 400))
-pygame_menu.themes.THEME_BLUE.widget_font_size =  12
-#theme = widget_font_size
-menu = pygame_menu.Menu(
-    height=300,
-    theme=pygame_menu.themes.THEME_BLUE,
-    title='Welcome to Pawnshop',
-    width=400
-)
+DB.DEBUG_LEVEL = 2
 
-
-def choose_module(value, module):
-    global THE_MODULE
-    THE_MODULE = module
-    print("Chose:", THE_MODULE)
-    
-def start_the_game() -> None:
+class MenuHandler():
     """
-    Function that starts a game. This is raised by the menu button,
-    here menu can be disabled, etc.
+    Object that will contain the menu manager and produce menus
     """
-    # Define globals
-    global menu
-    global THE_MODULE
+    def __init__(self, dimensions, window_surface):
+        self.manager = pygame_gui.UIManager(dimensions)
+        self.item_handlers   = {} # ^ Keep track of the menu items and
+                                  # handler functions. This a
+                                  # dictionary of dictionaries,
+                                  # mapping, event types to elements,
+                                  # to handlers.
+        self.clock = clock = pygame.time.Clock()
+        self.window_surface = window_surface
+        self.enabled = True
+        self.dimensions = dimensions
+        self.item_width = 150
+        self.item_height = 50
+        self.available_height = self.dimensions[1]-2*self.item_height
+        self.available_width  = self.dimensions[0]-2*self.item_width
+        
+        
+    def create_menu(self, menu_items, theme = None):
+        """
+        Every menu item must contain
+        1. The generating function (e.g. pygame_gui.elements.UIButton)
+        2. list of Pairs of event type and Handler function
+        3. The arguments (kwarg) as a dictionary
+        """
+        # First calculate how many columns we need:
+        total_menu_height = self.item_height * len(menu_items)
+        print("total_menu_height", total_menu_height)
+        print("self.available_height", self.available_height)
+        columns = math.ceil(total_menu_height / self.available_height)
+        items_per_column = math.ceil(len(menu_items) /columns) # Round up
+        DB.debug(2, "Menu needs", columns, " columns with ", items_per_column, "items per column")
+        
+        items = 0
+        for (item_gen, handlers, kwargs) in menu_items:
+            #Create coordinates
+            (column, row) = (items // items_per_column, items % items_per_column)
+            x_offset = self.available_width // columns
+            x = column * x_offset + (x_offset // 2) + self.item_width // 2
+            y = (row + 1) * self.item_height + self.item_height // 2
+            # Create the rectangle
+            rectangle = pygame.Rect((x, y), (self.item_width,
+                                             self.item_height))
+            
+            my_item = item_gen(manager = self.manager,
+                               relative_rect=rectangle, **kwargs)
+            for (event_type, handler) in handlers:
+                if not event_type in self.item_handlers:
+                    self.item_handlers[event_type] = {}
+                self.item_handlers[event_type][my_item] = handler
+            items = items + 1
 
-    # Reset main menu and disable
-    # You also can set another menu, like a 'pause menu', or just use the same
-    # main_menu as the menu that will check all your input.
-    menu.disable()
-    menu.full_reset()
+            
+        DB.debug(2, "Created a menue with", items, "items")
 
-    print("starting")
-    main.running_the_game(THE_MODULE, menu)
-    
-    # while True:
+    def event_check(self, event):
+        """
+        Checks events, updates time and draws menu 
+        """
 
-    #     # Application events
-    #     events = pygame.event.get()
-    #     for e in events:
-    #         if e.type == pygame.QUIT:
-    #             exit()
-    #         elif e.type == pygame.KEYDOWN:
-    #             if e.key == pygame.K_ESCAPE:
-    #                 menu.enable()
+        # Check the value-less events
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.type in self.item_handlers and event.ui_element in self.item_handlers[event.type]:
+                handler = self.item_handlers[event.type][event.ui_element]
+                handler()
+        # Check the events that have text values
+        elif event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
+            if event.type in self.item_handlers and event.ui_element in self.item_handlers[event.type]:
+                handler = self.item_handlers[event.type][event.ui_element]
+                handler(event.text)
+        # Check the events that have text values
+        elif event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
+            if event.type in self.item_handlers and event.ui_element in self.item_handlers[event.type]:
+                handler = self.item_handlers[event.type][event.ui_element]
+                handler(event.value)
 
-    #                 # Quit this function, then skip to loop of main-menu on line 221
-    #                 return
+        # Always update the manager.
+        self.manager.process_events(event)
+        
+    def frame_step(self, time_delta, events = []):
+        if self.enabled:
+            for event in events:
+                self.event_check(event)
+        self.manager.update(time_delta)
 
-    #     # Pass evento main_menu
-    #     if menu.is_enabled():
-    #         menu.update(events)
+    def draw_ui(self):
+        if self.enabled:
+            self.manager.draw_ui(self.window_surface)
 
-menu.add.dropselect("Module: ",
-                    available_modules,
-                    #default = ,
-                    onchange=choose_module)
-menu.add.button('Next', start_the_game)
-menu.add.button('Quit', pygame_menu.events.EXIT)
-
-if __name__ == '__main__':
-    menu.mainloop(surface)
+    def enable(self):
+        self.enabled = True
+    def disable(self):
+        self.enabled = False

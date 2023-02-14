@@ -1,6 +1,7 @@
 import pygame
 import virtual_board as VB
 import pygame_menu
+import sys
 
 ###########
 # Game init
@@ -13,8 +14,7 @@ def done(vb):
     print("HERE2")
     pygame.quit()
     print("HERE3")
-    quit()
-    exit()
+    sys.exit()
     print("HERE4")
 
 
@@ -36,7 +36,7 @@ def running_the_game(module, menu):
             # Close the game 
             if event.type == pygame.QUIT:
                 running = False
-                exit()
+                done(vb)
     
             # Press Q to quit
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:

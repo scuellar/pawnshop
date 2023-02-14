@@ -8,6 +8,7 @@ Examples:
 
 """
 import chess
+import menu
 from typing import Optional
 
 ################
@@ -20,7 +21,9 @@ class GameModule:
     
     def __init__(self, board = chess.Board()):
         self.board = board
-        self.config_menu = []
+
+    def get_config_menu(self):
+        return []
         
     def try_move(self, source_sq, target_sq) -> bool:
         raise Exception("Function not defined in Game Module: `try_move`.")
@@ -52,10 +55,15 @@ class GameModule:
             return self.board.peek()
         else:
             return None
+    def update_config(self) -> None:
+        """Call when the player clicks Play in teh configuration screen. Can
+        be used to load files based on configuration and set other
+        variables for the modules.
+        """
 
-##################
-# Modules that end
-##################
+#########################################
+# Modules that end or start after another
+#########################################
 class ModuleEnds:
     """
     For modules that end.
@@ -65,19 +73,41 @@ class ModuleEnds:
     def __init__(self):
         self.ended = False
 
+
+class ModuleFollows:
+    """
+    For modules that can follow another module.
+
+    These modules can be combined with other modules.
+    """
+    def __init__(self):
+        self.is_start = True
+
+    def copy_config(self, prev_module):
+        """Use this function to copy content from a previous module. This
+        function will impose restrictions on the modules it can
+        combine with. If only we had better type systems to enforce
+        those restrictions at type-checking time.
+        """
+        pass
+
 ####################
 # Combinators
 ####################
 class ModuleProduct(GameModule):
     """
-    Join two modules, the first one has to end
+    Join two modules, the first one has to be endable and the second has to be able to follow
     """
     def __init__(self, mod1, mod2):
         GameModule.__init__(self)
         self.mod1 = mod1()
         self.mod2 = mod2()
+        self.mod2.is_start = False #mod2 must be ModuleFollows
         self.mod1.set_board(self.board)
         self.mod2.set_board(self.board)
+        
+    def get_config_menu(self):
+        return self.mod1.get_config_menu() + self.mod2.get_config_menu()
 
     def set_board(self, board):
         self.board = board
@@ -122,6 +152,15 @@ class ModuleProduct(GameModule):
         else:
             return self.mod2.get_status()
 
+    def update_config(self):
+        self.mod1.update_config()
+        self.mod2.copy_config(self.mod1)
+        self.mod2.update_config()
+
+    def copy_config(self, module):
+        self.mod1.copy_config(module)
+        self.mod2.copy_config(module)
+        
 
 class ModuleProduct3(ModuleProduct):
     """Join three modules, the first one has to end, then the second
@@ -134,10 +173,10 @@ class ModuleProduct3(ModuleProduct):
         GameModule.__init__(self)
         self.mod1 = mod1()
         self.mod2 = ModuleProduct(mod2, mod3)
-
+        self.mod2.mod1.is_start = False 
         self.mod1.set_board(self.board)
         self.mod2.set_board(self.board)
-
+        
     name =  "Product3"
     def get_name(self):
         """
@@ -158,13 +197,14 @@ class ModuleProduct3(ModuleProduct):
 ####################
 
 # + Local Player vs. Player
-class PvP(GameModule):
+class PvP(GameModule,ModuleFollows):
     """ Player vs. Player
     The basic module to play locally on the same screen
     """
     name = "PvP"
     def __init__(self):
         GameModule.__init__(self)
+        ModuleFollows.__init__(self)
 
     def set_board(self, board):
         """Changes the board. Usefull for composition.
@@ -197,7 +237,7 @@ class PvP(GameModule):
                 # Set selected piece
                 return True
         return False
-    
+
 
 # + Engine module
 class PvE(PvP):
@@ -215,6 +255,21 @@ class PvE(PvP):
     def __init__(self):
         PvP.__init__(self)
         self.player_color = chess.WHITE
+
+    #Config
+    def copy_config(self, prev_module):
+        print("Copying config from", prev_module.name, "to", self.name)
+        self.player_color = prev_module.player_color
+        
+    def get_config_menu(self):
+        choose_player_button = menu.mk_drop_down(self.set_player, ["White", "Black"], "White")
+        
+        config_menu = PvP.get_config_menu(self)
+        if self.is_start:
+            config_menu = config_menu + [choose_player_button]
+        else:
+            print("No need for a player selection, I'm not first. I'm ", self.name)
+        return config_menu
     
     def change_side(self):
         if self.can_change_sides:
@@ -247,3 +302,11 @@ class PvE(PvP):
             return False
         # If it is your turn, try to select in the normal way
         return PvP.try_select(self, square)
+
+    # Configuration menu
+    def set_player(self, text):
+        if text == "White":
+            self.player_color = chess.WHITE
+        else:
+            self.player_color = chess.BLACK
+            

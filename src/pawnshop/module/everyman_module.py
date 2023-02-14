@@ -49,13 +49,13 @@ class EverymanModule(M.PvE, M.ModuleEnds):
         return next_move[0]
 
     def opponent_move(self):
+        print("I'm", self.name, "and the player color is", self.player_color )
         if self.ended:
             return False
         last_move = self.board.peek()
         next_move_uci = self.choose_next_move()
         if next_move_uci == None:
-            print("OPENING ENDED!!!")
-            print("End history:", self.history())
+            print("Brand new game from here on!!!")
             self.ended = True
             return False
         next_move = chess.Move.from_uci(next_move_uci)

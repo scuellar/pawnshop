@@ -8,6 +8,29 @@ import math
 
 DB.DEBUG_LEVEL = 2
 
+################################
+# Functions to build menu items
+################################
+
+def mk_label(name):
+    return (pygame_gui.elements.UILabel,
+            [],
+            dict(text=name))
+
+def mk_button(name, action):
+    return (pygame_gui.elements.UIButton,
+            [(pygame_gui.UI_BUTTON_PRESSED,
+              action)],
+            dict(text=name))
+
+def mk_drop_down(action, list, default):
+    return (pygame_gui.elements.UIDropDownMenu,
+            [(pygame_gui.UI_DROP_DOWN_MENU_CHANGED,
+              action)],
+            {'options_list' : list,
+             'starting_option' : default}
+            )
+
 class MenuHandler():
     """
     Object that will contain the menu manager and produce menus
@@ -38,8 +61,6 @@ class MenuHandler():
         """
         # First calculate how many columns we need:
         total_menu_height = self.item_height * len(menu_items)
-        print("total_menu_height", total_menu_height)
-        print("self.available_height", self.available_height)
         columns = math.ceil(total_menu_height / self.available_height)
         items_per_column = math.ceil(len(menu_items) /columns) # Round up
         DB.debug(2, "Menu needs", columns, " columns with ", items_per_column, "items per column")

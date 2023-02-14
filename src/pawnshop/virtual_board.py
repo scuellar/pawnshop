@@ -120,7 +120,8 @@ class VBoard:
         pygame.init()
 
         # Set screen size
-        self.screen = pygame.display.set_mode((self.board_height, self.board_height + self.status_height))
+        self.dimensions = (self.board_height, self.board_height + self.status_height)
+        self.screen = pygame.display.set_mode(self.dimensions)
 
 
     def try_move(self, target_square):
@@ -183,7 +184,8 @@ class VBoard:
         print("Goodbye!")
         
     def rest(self):
-        self.module.wait_action()
+        if self.enabled:
+            self.module.wait_action()
 
     def draw_status(self):
         name = self.module.get_name()

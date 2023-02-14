@@ -3,6 +3,8 @@ import chess.pgn as PGN
 import module.module as M
 import random
 import debug.debug as DB
+import os
+import menu
 
 class OpeningPracticeModule(M.PvE, M.ModuleEnds):
     """Opening Practice
@@ -14,11 +16,18 @@ class OpeningPracticeModule(M.PvE, M.ModuleEnds):
     def __init__(self):
         M.PvE.__init__(self)
         M.ModuleEnds.__init__(self) # creates self.ended
+        self.current_game = None
+        # Get Prep files:
         
-        pgn_file = open("prep/dragon.pgn")
-        self.full_prep = PGN.read_game(pgn_file)
-        self.current_game = self.full_prep
+        self.folder_path = "prep/" # replace with the actual folder path
+        pgn_files = [f for f in os.listdir(self.folder_path) if f.endswith('.pgn')]
 
+        self.prep_names = [os.path.splitext(pgn_file)[0] for pgn_file in pgn_files]
+        print("Preps: ", self.prep_names)
+        
+        #Default
+        self.prep_name = self.prep_names[0]
+        
     def opponent_move(self):
         if self.ended:
             return False
@@ -70,12 +79,21 @@ class OpeningPracticeModule(M.PvE, M.ModuleEnds):
         self.current_game = variations[index]
         self.board.push(self.current_game.move)
         return True
+
+    #####################
+    # Configuration menue
+    #####################
+    def get_config_menu(self):
+        config_menu = M.PvE.get_config_menu(self)
+        choose_prep_label = menu.mk_label("Choose Prep")
+        choose_prep = menu.mk_drop_down(self.set_prep, self.prep_names, self.prep_names[0])
+        return config_menu + [choose_prep_label, choose_prep]
         
-# pgn_file = open("prep/dragon.pgn")
-# dragon = PGN.read_game(pgn_file)
+    def set_prep(self, prep_file):
+        self.prep_name = prep_file
 
-# for move in dragon.mainline_moves():
-#     print(move)
-
-# print("----")
-# print("Variations:", len(dragon.variations))
+    def update_config(self):
+        super().update_config()
+        prep_file = open("prep/"+self.prep_name+".pgn")
+        full_prep = PGN.read_game(prep_file)
+        self.current_game = full_prep

@@ -5,22 +5,24 @@ import module.all_modules as modules
 import virtual_board as VB
 
 pygame.init()
-dimensions = (800, 600)
-
-pygame.display.set_caption('Quick Start')
-window_surface = pygame.display.set_mode(dimensions)
-
-background = pygame.Surface(dimensions)
-background.fill(pygame.Color('#000000'))
+pygame.display.set_caption('PawnShop')
 
 menu_active = True
 THE_MODULE = modules.default_module
 
 # Global instances
+chess_board = VB.VBoard()
+dimensions = chess_board.dimensions
+window_surface = pygame.display.set_mode(dimensions)
+
 main_menu_handler = menu.MenuHandler(dimensions, window_surface)
 config_menu_handler = menu.MenuHandler(dimensions, window_surface)
-chess_board = VB.VBoard()
-    
+
+
+
+background = pygame.Surface(dimensions)
+background.fill(pygame.Color('#000000'))
+
 
 # Play button
 def play_button_function(module_instance):
@@ -29,19 +31,16 @@ def play_button_function(module_instance):
     global chess_board
     global is_running
     
-    print ("We'll PLAY!")
-    print("We are playing wiht:", module_instance.get_name())
+    print("We are playing with:", module_instance.get_name())
     config_menu_handler.disable()
+    module_instance.update_config()
     chess_board.enable()
     
     
 def mk_play_button_item(module_instance):
-    play_button_item = (pygame_gui.elements.UIButton,
-                        [(pygame_gui.UI_BUTTON_PRESSED,
-                          lambda: play_button_function(module_instance))],
-                        dict(text='Play') )
+    play_button_item = menu.mk_button('Play', lambda: play_button_function(module_instance))
     return play_button_item
-
+    
 # Next button
 def next_button_function():
     global main_menu_handler
@@ -49,12 +48,12 @@ def next_button_function():
     global chess_board
     global THE_MODULE
     
-    print ("Let's next a game! Module:" , THE_MODULE)
+    print ("We shall play:" , THE_MODULE)
     main_menu_handler.disable()
     
     # Create the configuration menue
     module_instance = modules.available_modules[THE_MODULE]()
-    config_menu_items = module_instance.config_menu
+    config_menu_items = module_instance.get_config_menu()
     chess_board.module = module_instance
     play_button_item = mk_play_button_item(module_instance)
     
@@ -63,10 +62,7 @@ def next_button_function():
     config_menu_handler.enable()
     
     
-next_button_item = (pygame_gui.elements.UIButton,
-                     [(pygame_gui.UI_BUTTON_PRESSED,
-                       next_button_function)],
-                     dict(text='Next') )
+next_button_item = menu.mk_button('Next', next_button_function)
 
 # Goodbye button
 def exit_button_function():
@@ -77,10 +73,7 @@ def exit_button_function():
     main_menu_handler.disable()
     is_running = False
     
-exit_button_item = (pygame_gui.elements.UIButton,
-                   [(pygame_gui.UI_BUTTON_PRESSED,
-                    exit_button_function)],
-                   dict(text='Exit') )
+exit_button_item = menu.mk_button('Exit', exit_button_function) 
 
 
 # Back button
@@ -102,16 +95,11 @@ back_button_item = (pygame_gui.elements.UIButton,
 def choose_module_function(event_text):
     global THE_MODULE
     
-    print ("Expanded!")
     print("New Choice ", event_text)
     THE_MODULE = event_text
 
-choose_modules = (pygame_gui.elements.UIDropDownMenu,
-              [(pygame_gui.UI_DROP_DOWN_MENU_CHANGED,
-                choose_module_function)],
-              {'options_list' : modules.available_modules_names,
-               'starting_option' : modules.default_module}
-              )
+choose_modules = menu.mk_drop_down(choose_module_function,
+                              modules.available_modules_names, modules.default_module)
 
 main_menu_items = [choose_modules, next_button_item, exit_button_item]
 main_menu_handler.create_menu(main_menu_items)

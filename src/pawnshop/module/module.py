@@ -139,6 +139,10 @@ class ModuleProduct3(ModuleProduct):
 
     name =  "Product3"
     def get_name(self):
+        """
+        We overrride this function so it doesn't stack the Product's.
+        If we don't, it would say (e.g.) "(Product3, Product, mod1)"
+        """
         if not self.mod1.ended:
             in_name = self.mod1.get_name()
         elif not self.mod2.mod1.ended:
@@ -146,36 +150,6 @@ class ModuleProduct3(ModuleProduct):
         else:
             in_name = self.mod2.mod2.get_name()
         return self.name + ", " + in_name
-        
-    # def try_move(self, source_sq, target_sq) -> bool:
-    #     if not self.mod1.ended:
-    #         return self.mod1.try_move(source_sq, target_sq)
-    #     elif not self.mod2.ended:
-    #         return self.mod2.try_move(source_sq, target_sq)
-    #     else:
-    #         return self.mod3.try_move(source_sq, target_sq)
-        
-    # def try_select(self, square):
-    #     if not self.mod1.ended:
-    #         return self.mod1.try_select(square)
-    #     elif not self.mod2.ended:
-    #         return self.mod2.try_select(square)
-    #     else:
-    #         return self.mod3.try_select(square)
-
-    # def wait_action(self):
-    #     if not self.mod1.ended:
-    #         return self.mod1.wait_action()
-    #     elif not self.mod2.ended:
-    #         return self.mod2.wait_action()
-    #     else:
-    #         return self.mod3.wait_action()
-
-    def on_exit(self):
-        # TODO exit modul 1 early? e.g. quit engines and stuff
-        self.mod1.on_exit()
-        self.mod2.on_exit()
-        self.mod3.on_exit()
     
         
 ####################

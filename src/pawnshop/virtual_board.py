@@ -101,11 +101,13 @@ default_module.name = "TYD"
 
 
 class VBoard:
-    def __init__(self):
+    def __init__(self, module = default_module):
         self.selected_square = -1  #-1 is None
         self.selected_piece  = None
         # If you want to play form the black side
         self.flip_board = False
+        # Define the module to play with
+        self.module = module
 
         # How the board looks like 
         self.board_skin = default_skin
@@ -119,8 +121,6 @@ class VBoard:
         # Set screen size
         self.screen = pygame.display.set_mode((self.board_height, self.board_height + self.status_height))
 
-        # Define the module to play with
-        self.module = default_module # Creates an instance of the module
 
     def try_move(self, target_square):
         return self.module.try_move(self.selected_square, target_square)

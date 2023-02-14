@@ -1,7 +1,7 @@
 import module.module as M
 import random
 import chess
-import module.lichessTalk as lt
+import module.lichessTalk as LT
 # import asyncio
 
 def unzip(ls):
@@ -38,7 +38,8 @@ class EverymanModule(M.PvE, M.ModuleEnds):
     def choose_next_move(self):
         play = ",".join(self.history())
         print("Play so far: ", play)
-        dist = lt.get_distribution(play)
+        opening_name, dist = LT.get_distribution(play)
+        self.status = opening_name
         if len(dist)==0:
             return None
         (moves,count) = unzip(dist)

@@ -1,14 +1,21 @@
 import pygame
 import virtual_board as VB
+import pygame_menu
 
 ###########
 # Game init
 ###########
 
 def done(vb):
-    pygame.display.quit()
-    pygame.quit()
     vb.on_board_exit()
+    print("HERE")
+    pygame.display.quit()
+    print("HERE2")
+    pygame.quit()
+    print("HERE3")
+    quit()
+    exit()
+    print("HERE4")
 
 
 # Game loop
@@ -20,7 +27,8 @@ def running_the_game(module, menu):
     vb = VB.VBoard(module_instance)
     running = True
     while running:
-        for event in pygame.event.get():
+        events = pygame.event.get()
+        for event in events:
             ###############
             # GUI EVENTS:
             ###############
@@ -28,6 +36,7 @@ def running_the_game(module, menu):
             # Close the game 
             if event.type == pygame.QUIT:
                 running = False
+                exit()
     
             # Press Q to quit
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
@@ -39,6 +48,7 @@ def running_the_game(module, menu):
             
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 menu.enable()
+                print("ENABLED")
                 
             # Mouse click
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -52,7 +62,7 @@ def running_the_game(module, menu):
                     
         # If menu enabled, go back to main menue
         if menu.is_enabled():
-            menu.update()
+            menu.update(events)
             
         vb.draw_board()
         vb.rest()

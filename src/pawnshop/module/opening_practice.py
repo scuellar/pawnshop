@@ -2,6 +2,7 @@ import chess
 import chess.pgn as PGN
 import module.module as M
 import random
+import debug.debug as DB
 
 class OpeningPracticeModule(M.PvE, M.ModuleEnds):
     """Opening Practice
@@ -16,7 +17,6 @@ class OpeningPracticeModule(M.PvE, M.ModuleEnds):
         
         pgn_file = open("prep/dragon.pgn")
         self.full_prep = PGN.read_game(pgn_file)
-        print("Hey, I loaded a game:", self.full_prep)
         self.current_game = self.full_prep
 
     def opponent_move(self):
@@ -34,7 +34,7 @@ class OpeningPracticeModule(M.PvE, M.ModuleEnds):
             self.current_game = next_game
         else:
             self.ended = True
-            print ("Opening Ended")
+            DB.debug(2, "End of prep.")
             return False
 
     def try_move(self, source_sq, target_sq) -> bool:

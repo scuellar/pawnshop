@@ -59,17 +59,13 @@ def start_the_game() -> None:
     #     # Pass evento main_menu
     #     if menu.is_enabled():
     #         menu.update(events)
-def print_line():
-    print("-------------------------------+-++++++++++++++-+-------------------------------")
-print("STARTED")
+
 menu.add.dropselect("Module: ",
                     available_modules,
                     #default = ,
                     onchange=choose_module)
 menu.add.button('Next', start_the_game)
 menu.add.button('Quit', pygame_menu.events.EXIT)
-print_line()
 
 if __name__ == '__main__':
-    print_line()
     menu.mainloop(surface)

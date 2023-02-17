@@ -105,39 +105,45 @@ main_menu_handler.create_menu(main_menu_items)
 clock = pygame.time.Clock()
 is_running = True
 def done ():
+    chess_board.on_board_exit()
     pygame.display.quit()
     pygame.quit()
     exit()
 
 i = 0
-while is_running:
-    time_delta = clock.tick(60)/1000.0
-    events = pygame.event.get()
-    for event in events:
-        if event.type == pygame.QUIT:
-            is_running = False
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
-            is_running = False
-            break
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            main_menu_handler.enable()
-    
-    # Step in the menus (they only act if enabled)
-    main_menu_handler.frame_step(time_delta, events=events)
-    config_menu_handler.frame_step(time_delta, events=events)
-    chess_board.frame_step(events)
-    
-    
-    window_surface.blit(background, (0, 0))
-    main_menu_handler.draw_ui()
-    config_menu_handler.draw_ui()
-    chess_board.draw_board()
-    chess_board.rest()
+try:
+    while is_running:
+        time_delta = clock.tick(60)/1000.0
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                is_running = False
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                is_running = False
+                done()
+                break
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                main_menu_handler.enable()
         
+        # Step in the menus (they only act if enabled)
+        main_menu_handler.frame_step(time_delta, events=events)
+        config_menu_handler.frame_step(time_delta, events=events)
+        chess_board.frame_step(events)
+        
+        
+        window_surface.blit(background, (0, 0))
+        main_menu_handler.draw_ui()
+        config_menu_handler.draw_ui()
+        chess_board.draw_board()
+        chess_board.rest()
+            
+        
+        if not (main_menu_handler.enabled or config_menu_handler.enabled or chess_board.enabled):
+            background.fill(pygame.Color('#000000'))
     
-    if not (main_menu_handler.enabled or config_menu_handler.enabled or chess_board.enabled):
-        background.fill(pygame.Color('#000000'))
-
-    pygame.display.update()
-
+        pygame.display.update()
+except Exception as e:
+    print("Exception:", e)
+    
+        
 done()

@@ -99,7 +99,6 @@ default_module.name = "TYD"
 # Virtual Boarddo
 ################
 
-
 class VBoard:
     def __init__(self, module = default_module):
         self.selected_square = -1  #-1 is None
@@ -116,9 +115,6 @@ class VBoard:
         self.board_height = 8 * self.square_size
         self.status_height = 20
     
-        # Initialize game engine
-        pygame.init()
-
         # Set screen size
         self.dimensions = (self.board_height, self.board_height + self.status_height)
         self.screen = pygame.display.set_mode(self.dimensions)
@@ -179,7 +175,7 @@ class VBoard:
         if moved or not selected:
             self.deselect()
 
-    def on_board_exit(self):
+    def on_board_exit(self): 
         self.module.on_exit()
         print("Goodbye!")
         

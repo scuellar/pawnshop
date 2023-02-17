@@ -89,18 +89,18 @@ lichess_skin.text_color = (52,134,213)
 
 default_skin = lichess_skin
 
-mod1 = OP.OpeningPracticeModule
-mod2 = EM.EverymanModule
-mod3 = SF.StockfishModule
-default_module = M.ModuleProduct3(mod1, mod2, mod3) #SF.StockfishModule # OP.OpeningPracticeModule # EM.EverymanModule # M.PvP
-default_module.name = "TYD"
+# mod1 = OP.OpeningPracticeModule
+# mod2 = EM.EverymanModule
+# mod3 = SF.StockfishModule
+# default_module = mod3 #M.ModuleProduct3(mod1, mod2, mod3) #SF.StockfishModule # OP.OpeningPracticeModule # EM.EverymanModule # M.PvP
+#default_module.name = "TYD"
 
 ################
 # Virtual Boarddo
 ################
 
 class VBoard:
-    def __init__(self, module = default_module):
+    def __init__(self, module = None):
         self.selected_square = -1  #-1 is None
         self.selected_piece  = None
         # If you want to play form the black side

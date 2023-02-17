@@ -123,6 +123,11 @@ try:
                 done()
                 break
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                # Quit the current board
+                chess_board.on_board_exit()
+                chess_board.disable()
+                # TODO: better way to rested the board?
+                chess_board = VB.VBoard()
                 main_menu_handler.enable()
         
         # Step in the menus (they only act if enabled)

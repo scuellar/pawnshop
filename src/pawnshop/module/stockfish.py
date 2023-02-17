@@ -20,6 +20,7 @@ class StockfishModule(M.PvE):
         self.board.push(result.move)
 
     def on_exit(self):
+        print("Exiting Engine")
         self.engine.quit()
     
 # pgn_file = open("prep/dragon.pgn")

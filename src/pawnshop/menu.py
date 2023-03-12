@@ -3,7 +3,7 @@ Main menu for pawnshop
 """
 import pygame
 import pygame_gui
-import debug.debug as DB
+from pawnshop.debug import debug as DB
 import math
 
 DB.DEBUG_LEVEL = 2

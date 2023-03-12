@@ -1,0 +1,21 @@
+[Event "Corus Group C"]
+[Site "Wijk aan Zee NED"]
+[Date "2004.01.24"]
+[Round "12"]
+[White "Magnus Carlsen"]
+[Black "Sipke Ernst"]
+[Result "1-0"]
+[WhiteTitle "IM"]
+[BlackTitle "IM"]
+[WhiteElo "2484"]
+[BlackElo "2474"]
+[UTCDate "2016.08.24"]
+[UTCTime "01:44:18"]
+[Variant "Standard"]
+[ECO "B19"]
+[Opening "Caro-Kann Defense: Classical Variation, Spassky Variation"]
+[Annotator "https://lichess.org/@/chessanalyst"]
+
+1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Bf5 5. Ng3 { [%cal Gg3f5] } 5... Bg6 6. h4 { [%cal Gh4h5] } (6. Nf3 { The main move these days typically is to begin with Nf3 although it often transposes after h4. The idea here is to force Nd7. Since black doesn't want to get into trouble with the light bishop. } { [%cal Gf3e5] } 6... Nd7) 6... h6 7. Nf3 Nd7 { [%cal Rf3e5] } 8. h5 Bh7 9. Bd3 Bxd3 10. Qxd3 e6 { [%cal Gf8e7,Ge7d6] } 11. Bf4 Ngf6 12. O-O-O Be7 { [%cal Ge8g8] } 13. Ne4 (13. Kb1 { Most common continuation. } 13... O-O 14. Ne4 Nxe4 15. Qxe4) 13... Qa5 { [%cal Ga5a2] } 14. Kb1 O-O 15. Nxf6+ (15. Ne5)  (15. g4) 15... Nxf6 16. Ne5 Rad8 { [%cal Gd8d3,Gc6c5] } 17. Qe2!? (17. Qg3 { [%cal Gf4h6] }) 17... c5 18. Ng6!! { This move was actually seen the year before between Pablo Almagro Llamas and Jan Gustafsson. The game ended in a draw even though white was winning in that game too. } 18... fxg6? (18... Rfe8 19. Nxe7+ Rxe7 20. dxc5) 19. Qxe6+ Kh8 20. hxg6 { [%cal Ge6e7] } (20. Qxe7 Nd5 { [%cal Gd5e7,Gd5f4] }) 20... Ng8 { [%cal Gg8e7,Gg8h6] } (20... Qb6 21. Qxe7 $18) 21. Bxh6!! gxh6 (21... Nxh6 { This leads to mate in 6. } 22. Rxh6+ gxh6 23. Qxe7 Qc7 24. Qxc7 Rd7 25. Qxd7 Rf7 26. Qxf7 { [%cal Gf7h7] } 26... h5 27. Qh7#) 22. Rxh6+ Nxh6 23. Qxe7 { [%cal Ge7h7] } 23... Nf7 24. gxf7 { [%cal Gd1h1] } (24. Qf6+ Kg8 25. Rh1 Nh6 26. Qe7 Nf7 27. Qf6 Nh6) 24... Kg7 25. Rd3 { [%cal Gd3g3] } 25... Rd6?? (25... Qb6 26. Rg3+ Qg6 27. Rxg6+ Kxg6 { The best continuation. } { [%cal Gf8h8,Gh8h1,Gb2b3,Ga2a3] }) 26. Rg3+ (26. Qxd6?? Qe1+ { [%cal Ge1b1] } 27. Rd1 Qxd1#) 26... Rg6 27. Qe5+ Kxf7 28. Qf5+ Rf6?? (28... Ke7 29. Re3+ (29. Qxg6 Qe1#) 29... Kd6 30. Qxf8+) 29. Qd7# 1-0
+
+

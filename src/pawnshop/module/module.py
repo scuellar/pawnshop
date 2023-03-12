@@ -8,7 +8,7 @@ Examples:
 
 """
 import chess
-import menu
+from pawnshop import menu
 from typing import Optional
 
 ################

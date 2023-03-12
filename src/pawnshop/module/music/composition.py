@@ -394,12 +394,12 @@ def profile_run():
     run(count=10,stop=False, should_play=False)
     
     
-# stats_file = 'runstats_True'
-# cProfile.run('profile_run()', stats_file)
+stats_file = 'runstats_funcs_out'
+cProfile.run('profile_run()', stats_file)
 
-# import pstats
-# from pstats import SortKey
-# p = pstats.Stats(stats_file)
-# p.strip_dirs().sort_stats(SortKey.TIME, SortKey.CUMULATIVE).print_stats(20)
+import pstats
+from pstats import SortKey
+p = pstats.Stats(stats_file)
+p.strip_dirs().sort_stats(SortKey.TIME, SortKey.CUMULATIVE).print_stats(20)
     
-run()
+# run()

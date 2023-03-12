@@ -32,6 +32,7 @@ registers = {
 Mreg = registers['major']
 mreg = registers['minor']
 
+verbose = False
 
 #### CHECKERS
 def get_runs_from_melody(melody):
@@ -115,7 +116,70 @@ class MelodyStats():
         return print_str
         
         
+    
+### First, checks that can be done only on the last one or two entries
+def no_leaps_larger_than_octave(lps): # last leap
+    # let's disallow octaves as well, because they rarely sound good
+    if not any([abs(x) >= P8 for x in lps]):
+        return True
+    else:
+        if verbose: print('fail: no_leaps_larger_than_octave in ' + str(m))
+
+def no_dissonant_leaps(lps):         # last leap
+    consonant = [M3, P4, P5, m6, P8]
+    if not any([abs(x) not in consonant for x in lps]):
+        return True
+    else:
+        if verbose: print('fail: no_dissonant_leaps in ' + str(m))
         
+def larger_leaps_followed_by_change_of_direction(m, invs, dirs): # 2 interval & 2 directions
+    for i in range(len(m) - 2):
+        if abs(invs[i]) > 4 and dirs[i] == dirs[i + 1]:
+            if verbose: print ('fail: larger_leaps_followed_by_change_of_direction in ' + str(m))
+            return False
+    return True
+
+def leading_note_goes_to_tonic(m): # last two notes
+    for i in range(len(m) - 1):
+        if m[i] %12 == 11 and m[i+1]%12 != 0:
+            if verbose: print ('fail: leading_note_goes_to_tonic in ' + str(m))
+            return False
+    return True
+
+def no_same_two_intervals_in_a_row(m, invs): # last 2 intervals 
+    for i in range(len(m) - 2):
+        if invs[i] > Step and invs[i] == - invs[i + 1]:
+            if verbose: print ('fail: no_same_two_intervals_in_a_row in ' + str(m))
+            return False
+    return True
+    
+def no_noodling(m, invs): # Last 3 intervals
+    for i in range(len(m) - 3):
+        if invs[i] == - invs[i + 1] and invs[i + 1] == - invs[i + 2]:
+            if verbose: print ('fail: no_noodling in ' + str(m))
+            return False
+    return True
+
+def no_long_runs(m):  # Last 4 notes
+    runs = get_runs_from_melody(m)
+    for run in runs:
+        if len(run) > 4:
+            if verbose: print ('fail: no_long_runs in ' + str(m) + ' : ' + str(runs))
+            return False
+    return True
+
+# Only requires the last 4 notes to see if it is a run and is not resolved.
+def no_unresolved_melodic_tension(m):
+    consonant_movements = [m3, M3, P4, P5, m6, P8]
+
+    runs = get_runs_from_melody(m)
+    for run in runs:
+        movement = abs(run[0] - run[-1])
+        if movement not in consonant_movements:
+            if verbose: print ('fail: no_unresolved_melodic_tension in ' + str(m) + ' : ' + str(runs))
+            return False
+    return True
+     
     
         
         
@@ -133,74 +197,11 @@ def check_melody_last_bit(melodyStats, type, verbose, just_last = True):
         invs  = melodyStats.intervals  
         dirs = melodyStats.directions 
         lps      = melodyStats.leaps
-    
-    ### First, checks that can be done only on the last one or two entries
-    def no_leaps_larger_than_octave(): # last leap
-        # let's disallow octaves as well, because they rarely sound good
-        if not any([abs(x) >= P8 for x in lps]):
-            return True
-        else:
-            if verbose: print('fail: no_leaps_larger_than_octave in ' + str(m))
 
-    def no_dissonant_leaps():         # last leap
-        consonant = [M3, P4, P5, m6, P8]
-        if not any([abs(x) not in consonant for x in lps]):
-            return True
-        else:
-            if verbose: print('fail: no_dissonant_leaps in ' + str(m))
-            
-    def larger_leaps_followed_by_change_of_direction(): # 2 interval & 2 directions
-        for i in range(len(m) - 2):
-            if abs(invs[i]) > 4 and dirs[i] == dirs[i + 1]:
-                if verbose: print ('fail: larger_leaps_followed_by_change_of_direction in ' + str(m))
-                return False
-        return True
-
-    def leading_note_goes_to_tonic(): # last two notes
-        for i in range(len(m) - 1):
-            if m[i] %12 == 11 and m[i+1]%12 != 0:
-                if verbose: print ('fail: leading_note_goes_to_tonic in ' + str(m))
-                return False
-        return True
-
-    def no_same_two_intervals_in_a_row(): # last 2 intervals 
-        for i in range(len(m) - 2):
-            if invs[i] > Step and invs[i] == - invs[i + 1]:
-                if verbose: print ('fail: no_same_two_intervals_in_a_row in ' + str(m))
-                return False
-        return True
-        
-    def no_noodling(): # Last 3 intervals
-        for i in range(len(m) - 3):
-            if invs[i] == - invs[i + 1] and invs[i + 1] == - invs[i + 2]:
-                if verbose: print ('fail: no_noodling in ' + str(m))
-                return False
-        return True
-
-    def no_long_runs():  # Last 4 notes
-        runs = get_runs_from_melody(m)
-        for run in runs:
-            if len(run) > 4:
-                if verbose: print ('fail: no_long_runs in ' + str(m) + ' : ' + str(runs))
-                return False
-        return True
-
-    # Only requires the last 4 notes to see if it is a run and is not resolved.
-    def no_unresolved_melodic_tension():
-        consonant_movements = [m3, M3, P4, P5, m6, P8]
-
-        runs = get_runs_from_melody(m)
-        for run in runs:
-            movement = abs(run[0] - run[-1])
-            if movement not in consonant_movements:
-                if verbose: print ('fail: no_unresolved_melodic_tension in ' + str(m) + ' : ' + str(runs))
-                return False
-        return True
-
-    def half00() : return leading_note_goes_to_tonic() and no_same_two_intervals_in_a_row()
-    def half01() : return larger_leaps_followed_by_change_of_direction() and no_dissonant_leaps()
-    def half10() : return no_leaps_larger_than_octave()
-    def half11() : return no_noodling() and no_long_runs() and no_unresolved_melodic_tension()
+    def half00() : return leading_note_goes_to_tonic(m) and no_same_two_intervals_in_a_row(m, invs)
+    def half01() : return larger_leaps_followed_by_change_of_direction(m, invs, dirs) and no_dissonant_leaps(lps)
+    def half10() : return no_leaps_larger_than_octave(lps)
+    def half11() : return no_noodling(m, invs) and no_long_runs(m) and no_unresolved_melodic_tension(m)
 
     return half00() and half01() and half10() and half11()
 

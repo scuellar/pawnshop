@@ -75,7 +75,7 @@ class MelodicStep():
             stats = self.stats_cantus
         elif type == 'lead':
             stats = self.stats_lead
-        return check_melody_idependent(stats, type, verbose)
+        return check_melody_idependent(notes,stats, type, verbose)
 
     def check_harmony(self, notes, cnotes, verbose = True):
         cantus = self.cantus + cnotes
@@ -212,7 +212,7 @@ class MelodicStep():
 
         return True
 
-LENGTH  = 10
+LENGTH  = 8
    
 class PhraseSearch():
     """Object made to search a phrase
@@ -361,7 +361,7 @@ def play(melody , players=[]):
 
     return ([player1, player2])
 
-def run(count=10, stop=True, should_play=True):
+def run(count=30, stop=True, should_play=True):
     players = []
     phrase_count = 3
     melodies = []
@@ -393,13 +393,21 @@ def run(count=10, stop=True, should_play=True):
 def profile_run():
     run(count=10,stop=False, should_play=False)
     
-    
-stats_file = 'runstats_funcs_out'
-cProfile.run('profile_run()', stats_file)
 
-import pstats
-from pstats import SortKey
-p = pstats.Stats(stats_file)
-p.strip_dirs().sort_stats(SortKey.TIME, SortKey.CUMULATIVE).print_stats(20)
-    
-# run()
+
+
+# import cProfile, pstats, io
+# from pstats import SortKey
+# pr = cProfile.Profile(builtins=False)
+
+
+# stats_file = 'runstats_funcs_out'
+# #cProfile.run('profile_run()', stats_file)
+# pr.run('profile_run()')
+# pr.dump_stats(stats_file)
+
+
+# p = pstats.Stats(stats_file)
+# p.strip_dirs().sort_stats(SortKey.CALLS, SortKey.TIME, SortKey.CUMULATIVE).print_stats('check_')
+
+run()

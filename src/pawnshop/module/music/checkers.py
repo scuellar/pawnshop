@@ -323,7 +323,9 @@ def check_harmony_independent(lead, cantus, verbose = True):
     
     return no_parallel_fifths_or_octaves() and no_parallel_chains() and no_dissonant_intervals() and no_intervals_larger_than_12th()
 
-
+#TODO: When a global fails, we should backtrack more then one
+#step. Otherwise we are stuck on a bunch of wrong branches, until they
+#all inevitably fail.
 def check_globals_independent(m, verbose=False):
     intervals = [m[i+1] - m[i] for i in range(len(m) - 1)]
     #dirs = [sign(intervals[i]) for i in range(len(intervals))]
@@ -347,6 +349,7 @@ def check_globals_independent(m, verbose=False):
             if verbose: print('Glob fail: has_climax in ' + str(m))
 
     def changes_direction_several_times(): #Global
+        #TODO: this shouldn't be intervals, it should be direction changes! no?
         directional_changes = [intervals[i+1] - intervals[i] for i in range(len(m) - 2)]
         if len([x for x in directional_changes if x < 0]) >= 2:
             return True

@@ -151,60 +151,46 @@ class MelodicStep():
         cnotes_down = [cur_cantus[-1] - n for n in allowed_intervals]
         cnotes = cnotes_up + cnotes_down
         # only in the register
-        cnotes = list(set(cnotes) & set(register))
+        cnotes = list(set(cnotes) & set(register)) 
         cnotes = self.filter_cantus(cnotes, verbose)
-        #print("================ FOUND NEXT CNOTES")
-        #print("CNOTES:", cnotes)
         #####################
         # Search for a leading voice
         #####################
-        #print("search_next got some cnotes:", cnotes)
         for cnote in cnotes:
         # next note can go up or down or equal.
             last_vn = cur_lead[-1][-1]
             vnotes = self.get_next_leads(last_vn, cnote, self.lead_speed, register)
-            # print("LEAD notes", vnotes)
             # TODO Duplicated work!
             
-            #print("For cnote:", cnote, "Found a leads", vnotes)
             vnotes = self.filter_lead(vnotes, cnote, verbose)
             more_next_notes = [(vn, cnote) for vn in vnotes]
             next_notes = next_notes + more_next_notes
 
-        #print("and we are done")
         if next_notes:
-            #print("yes we are. With next notes", next_notes)
-            #self.next_notes = [MelodicStep([lnote], [cnote], self) for (lnote, cnote) in next_notes]
             self.next_notes = next_notes
-            #print("we even returned!")
             return True
         else:
-            #print("no we are not")
             return False
 
     def choose_next_note(self, verbose = False):
-        #print("choose_next_note")
         """ From all the possible next steps, it chooses one, using heuristics.
         """
 
         # First compute next notes 
         if not self.next_notes and not self.current:
-            #print("I got to pick some ")
             if not self.search_next(Mreg, verbose):
                 return False
 
-        #print("choose_next_note got next notes")
-        
-        if self.next_notes:
-            
-            #print("choose_next_note HAS next notes")
+        if self.next_notes:            
             lnote, cnote = self.next_notes[0]
+            ## Double check the melody.
+
+            
             child_name = self.name + "-" + str(self.searched_branches)
             self.current =  MelodicStep([lnote], [cnote], self, name=child_name)
             self.searched_branches = self.searched_branches + 1
             self.next_notes = self.next_notes[1:]
         else:
-            #print("choose_next_note DOESNT HAVE  next notes")
             ### If after computing notes, it's empty that means there is
             ### no viable branch or we explored them all
             if verbose: print("Ran out of branches to explore. Backtrack!")
